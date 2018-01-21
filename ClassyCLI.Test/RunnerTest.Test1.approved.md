@@ -296,3 +296,156 @@ Do not allow TextWriter to open existing file (by default)
 "-b"
 
 
+# Running E1 OF a b c
+
+# Invoked E1 OF
+
+## ss System.String[]
+
+[
+  "a",
+  "b",
+  "c"
+]
+
+
+# Running E1 OG a b c d
+
+# Invoked E1 OG
+
+## oo System.Collections.Generic.List<System.Object>
+
+[
+  "a",
+  "b",
+  "c",
+  "d"
+]
+
+
+# Running E1 OH 1 2
+
+# Invoked E1 OH
+
+## ii System.Collections.Generic.IEnumerable<System.Int32>
+
+[
+  1,
+  2
+]
+
+
+# Running E1 OI s 2018-01-01 2019-01-01
+
+# Invoked E1 OI
+
+## s System.String
+
+"s"
+
+## dd System.Collections.Generic.IList<System.DateTime>
+
+[
+  "2018-01-01T00:00:00",
+  "2019-01-01T00:00:00"
+]
+
+
+# Running E1 OI -s s 2018-01-01 2019-01-01
+
+# Invoked E1 OI
+
+## s System.String
+
+"s"
+
+## dd System.Collections.Generic.IList<System.DateTime>
+
+[
+  "2018-01-01T00:00:00",
+  "2019-01-01T00:00:00"
+]
+
+
+# Running E1 OI s -d 2018-01-01
+
+# Invoked E1 OI
+
+## s System.String
+
+"s"
+
+## dd System.Collections.Generic.IList<System.DateTime>
+
+[
+  "2018-01-01T00:00:00"
+]
+
+
+# Running E1 OI -s s -d 2018-01-01
+
+# Invoked E1 OI
+
+## s System.String
+
+"s"
+
+## dd System.Collections.Generic.IList<System.DateTime>
+
+[
+  "2018-01-01T00:00:00"
+]
+
+
+# Running E1 OI -d 2018-01-01 -s s -d 2019-01-01
+
+# Invoked E1 OI
+
+## s System.String
+
+"s"
+
+## dd System.Collections.Generic.IList<System.DateTime>
+
+[
+  "2018-01-01T00:00:00",
+  "2019-01-01T00:00:00"
+]
+
+
+# Running E1 OJ
+
+# Invoked E1 OJ
+
+## ii System.Collections.Generic.IEnumerable<System.Int32>
+
+null
+
+
+# Running E1 OJ 1
+
+# Invoked E1 OJ
+
+## ii System.Collections.Generic.IEnumerable<System.Int32>
+
+[
+  1
+]
+
+
+# Running E2 OJ 1
+
+# Invoked E2 OJ
+
+## ii System.Collections.Generic.IEnumerable<System.Int32>
+
+[
+  1
+]
+
+
+# Running E2 TwoVoid
+
+# Invoked E2 TwoVoid
+
+

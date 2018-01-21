@@ -14,7 +14,7 @@ namespace ClassyCLI
             public ParameterInfo ParameterInfo { get; private set; }
             public object[] Parameters { get; private set; }
             public int Index { get; private set; }
-            public bool HasValue { get; private set; }
+            public bool HasValue { get; protected set; }
 
             public virtual void SetValue(object s)
             {
@@ -42,22 +42,48 @@ namespace ClassyCLI
                 for (int i = 0; i < ps.Length; i++)
                 {
                     var param = ps[i];
-                    info[i] = new Parameter
-                    {
-                        Name = param.Name,
-                        Index = i,
-                        ParameterInfo = param,
-                        Parameters = args,
-                    };
+                    var p = CreateParameter(param);
+                    info[i] = p;
+
+                    p.Name = param.Name;
+                    p.Index = i;
+                    p.ParameterInfo = param;
+                    p.Parameters = args;
                 }
 
                 return (args, info);
             }
+
+            static MethodInfo _createList = typeof(ParameterList).GetMethod(nameof(ParameterList.Create));
+
+            private static Parameter CreateParameter(ParameterInfo info)
+            {
+                var type = info.ParameterType;
+                Type ienumerable = null;
+                if (type != typeof(string))
+                {
+                    ienumerable = new[] { type }
+                        .Concat(type.GetInterfaces())
+                        .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                }
+
+                if (ienumerable == null) return new Parameter();
+
+                var item = ienumerable.GetGenericArguments()[0];
+                return new EnumerableParameter(_createList.MakeGenericMethod(item, type));
+            }
+
         }
 
         class EnumerableParameter : Parameter
         {
             private ParameterList _list;
+            private MethodInfo _create;
+
+            public EnumerableParameter(MethodInfo methodInfo)
+            {
+                _create = methodInfo;
+            }
 
             public override void SetFinalValue() => Parameters[Index] = _list?.Convert();
 
@@ -68,13 +94,12 @@ namespace ClassyCLI
 
             public override void SetValue(string s)
             {
-                if (_list == null) CreateList();
+                if (_list == null)
+                {
+                    _list = (ParameterList)_create.Invoke(null, null);
+                }
                 _list.Add(s);
-            }
-
-            private void CreateList()
-            {
-                throw new NotImplementedException();
+                HasValue = true;
             }
         }
 
@@ -82,7 +107,7 @@ namespace ClassyCLI
         {
             public abstract void Add(string s);
             public abstract object Convert();
-            public ParameterList Create<TItem, TList>() => new ParameterList<TItem, TList>();
+            public static ParameterList Create<TItem, TList>() => new ParameterList<TItem, TList>();
         }
 
         sealed class ParameterList<TItem, TList> : ParameterList
@@ -118,6 +143,7 @@ namespace ClassyCLI
             var methodArg = arguments[1];
 
             var cls = types
+                .Where(m => m.Name.IndexOf(classArg, _comparison) != -1)
                 .Single();
 
 
@@ -127,23 +153,21 @@ namespace ClassyCLI
 
             var instance = method.IsStatic ? null : Activator.CreateInstance(cls);
             var (args, info) = Parameter.Create(method.GetParameters());
-            //var margs = method.GetParameters();
-            //var parameters = new object[margs.Length];
 
-            Parameter named = null;
+            Parameter destination = null;
             int positional = -1;
             var positionalOnly = false;
+            var named = false;
+
             foreach (var a in arguments.Skip(2))
             {
-                Parameter destination;
-                if (named != null)
+                if (destination == null)
                 {
-                    destination = named;
-                    named = null;
-                }
-                else
-                {
-                    if (!positionalOnly && TryGetNamedParam(a, info, out named)) continue;
+                    if (!positionalOnly && TryGetNamedParam(a, info, out destination))
+                    {
+                        named = true;
+                        continue;
+                    }
 
                     if (a == "--")
                     {
@@ -158,13 +182,22 @@ namespace ClassyCLI
                     } while (destination.HasValue);
                 }
 
-                //destination.Value = ConvertValue(a, destination.ParameterInfo.ParameterType, ignoreCase);
                 destination.SetValue(a);
+
+                if (named || !(destination is EnumerableParameter))
+                {
+                    destination = null;
+                    named = false;
+                }
             }
 
             foreach (var param in info)
             {
-                if (param.HasValue) continue;
+                if (param.HasValue)
+                {
+                    param.SetFinalValue();
+                    continue;
+                }
 
                 var paramInfo = param.ParameterInfo;
                 if (!paramInfo.HasDefaultValue)
@@ -173,7 +206,6 @@ namespace ClassyCLI
                     throw new Exception("need more");
                 }
 
-                //param.Value = ConvertValue(paramInfo.DefaultValue, paramInfo.ParameterType, ignoreCase);
                 param.SetValue(paramInfo.DefaultValue);
             }
 
@@ -195,7 +227,7 @@ namespace ClassyCLI
             if (ix != 0) return false;
 
             // remove leading and trainiling prefix characters
-            // technically remove them all -- super ineffecient
+            // technically remove them all -- super inefficient
             while (ix != -1)
             {
                 name = name.Remove(ix, 1);

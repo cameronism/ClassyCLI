@@ -79,6 +79,15 @@ namespace ClassyCLI.Test
             public void OD(TextWriter t) => Log(this, new { t });
             public void OE(string a, string b) => Log(this, new { a, b });
             public void OF(params string[] ss) => Log(this, new { ss });
+            public void OG(List<object> oo) => Log(this, new { oo });
+            public void OH(IEnumerable<int> ii) => Log(this, new { ii });
+            public void OI(string s, IList<DateTime> dd) => Log(this, new { s, dd });
+            public void OJ(IEnumerable<int> ii = null) => Log(this, new { ii });
+        }
+
+        private class E2 : E1
+        {
+            public void TwoVoid() => Log(this, new { });
         }
 
         [Fact]
@@ -146,25 +155,41 @@ namespace ClassyCLI.Test
             Run("E1 OE -a aaaaa -- -b", types);
 
             // params methods should be easy to invoke
-            //Run("E1 OF a b c", types);
+            Run("E1 OF a b c", types);
+            Run("E1 OG a b c d", types);
+            Run("E1 OH 1 2", types);
+            Run("E1 OI s 2018-01-01 2019-01-01", types);
+            Run("E1 OI -s s 2018-01-01 2019-01-01", types);
+            Run("E1 OI s -d 2018-01-01", types);
+            Run("E1 OI -s s -d 2018-01-01", types);
+            Run("E1 OI -d 2018-01-01 -s s -d 2019-01-01", types);
+            Run("E1 OJ", types);
+            Run("E1 OJ 1", types);
+
+
+            // multiple candidate classes
+            types = new[] { typeof(E1), typeof(E2) };
+            Run("E2 OJ 1", types);
+            Run("E2 TwoVoid", types);
 
 
 
-
-            // named params at cli
-            // mixed positional and named params
-            // multiple classes
             // optional class or method names 
             // - (sometimes) 
             // - or just ignore class names and assume method name is first
+            // completion
             // help
             // help for incomplete params
-            // completion
             // runme attribute
             // marker interface
 
+
+            // multiple classes
             // optional / default params
             // stdin and file names to Stream or StreamReader param
+            // named params at cli
+            // mixed positional and named params
+            // enumerable parameter (it's very greedy)
 
             Approve(_sb);
         }
@@ -175,11 +200,12 @@ namespace ClassyCLI.Test
             var approved = Path.ChangeExtension(path, $".{member}.approved.{extension}");
             var received = Path.ChangeExtension(path, $".{member}.received.{extension}");
 
-            File.WriteAllText(received, sb.ToString());
+            var actual = sb.ToString();
+            File.WriteAllText(received, actual);
 
-            Assert.Equal(expected: File.ReadAllText(approved), actual: File.ReadAllText(received), ignoreLineEndingDifferences: true);
+            Assert.Equal(expected: File.ReadAllText(approved), actual: actual, ignoreLineEndingDifferences: true);
 
-            // if previous line didn't throw then cleanup
+            // if assertion didn't throw then cleanup
             File.Delete(received);
         }
 
