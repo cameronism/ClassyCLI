@@ -1,14 +1,14 @@
-# Classy Command Line
+# ClassyCLI
 
-`ClassyCommandLine.Run()` provides an excellent command line interface to your existing methods and 
-requires no extra boilerplate or configuration.  `ClassyCommandLine` also supports command line completion
+`ClassyCLI.Run()` provides an excellent command line interface to your existing methods and 
+requires no extra boilerplate or configuration.  `ClassyCLI` also supports command line completion
 for PowerShell, bash and zsh.
 
 Minimal working example:
 
 ```C#
 using System;
-using ClassyCommandLine;
+using ClassyCLI;
 
 namespace Demo
 {
@@ -16,7 +16,7 @@ namespace Demo
 	{
 		static void Main(string[] args)
 		{
-			ClassyCommandLine.Run();
+			ClassyCLI.Run();
 		}
 	}
 
@@ -48,13 +48,13 @@ Hello Ron!
 let's bring them together with as little ceremony as possible (as nicely as possible).
 
 There are already [many awesome command line parsers for .NET](https://github.com/quozd/awesome-dotnet#cli);
-`ClassyCommandLine` is different.  .NET (C# in particular) already requires 
+`ClassyCLI` is different.  .NET (C# in particular) already requires 
 plenty of boilerplate: classes, methods, return types, parameter types, names on all of them and (basically always) namespaces.
-The goal of `ClassyCommandLine` is to provide an excellent command line interface based on the boilerplate you have to write anyway.
-Your `Main` method really can be just `ClassyCommandLine.Run()` then 
+The goal of `ClassyCLI` is to provide an excellent command line interface based on the boilerplate you have to write anyway.
+Your `Main` method really can be just `ClassyCLI.Run()` then 
 write plain old methods without special considerations for the command line.
 
-One off console app "scripts", power user swiss army knives, and everything in between is supported by `ClassyCommandLine`.
+One off console app "scripts", power user swiss army knives, and everything in between is supported by `ClassyCLI`.
 
 
 ## Features
@@ -94,7 +94,7 @@ TODO:
 
 ## Configuration
 
-`ClassyCommandLine` strives to do the right thing out of the box but can be customized if needed.
+`ClassyCLI` strives to do the right thing out of the box but can be customized if needed.
 
 _all TODO_
 
