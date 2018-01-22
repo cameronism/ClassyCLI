@@ -269,41 +269,44 @@ namespace ClassyCLI
                 return Enum.ToObject(type, value);
             }
 
-            if (type == typeof(Stream) && s != null)
+            if (s != null)
             {
-                if (s == "-") return Console.OpenStandardInput();
+                if (type == typeof(Stream))
+                {
+                    if (s == "-") return Console.OpenStandardInput();
 
-                // try to treat s as path
-                if (TryGetFileInfo(s, out var fi)) return fi.OpenRead();
+                    // try to treat s as path
+                    if (TryGetFileInfo(s, out var fi)) return fi.OpenRead();
 
-                // FIXME this is the part where we'll want to be more helpful 
-                throw new Exception("can't find that");
+                    // FIXME this is the part where we'll want to be more helpful 
+                    throw new Exception("can't find that");
+                }
+
+                if (type == typeof(TextReader))
+                {
+                    if (s == "-") return Console.In;
+
+                    // try to treat s as path
+                    if (TryGetFileInfo(s, out var fi)) return fi.OpenText();
+
+                    // FIXME this is the part where we'll want to be more helpful 
+                    throw new Exception("can't find that");
+                }
+
+                if (type == typeof(TextWriter))
+                {
+                    if (s == "-") return Console.Out;
+
+                    // insist that a new file be created 
+                    // not getting into the append / overwrite / confirm fun (yet)
+                    var file = File.Open(s, FileMode.CreateNew);
+                    return new StreamWriter(file);
+                }
+
+                // don't worry about if it exists
+                if (type == typeof(FileInfo)) return new FileInfo(s);
+                if (type == typeof(DirectoryInfo)) return new DirectoryInfo(s);
             }
-
-            if (type == typeof(TextReader) && s != null)
-            {
-                if (s == "-") return Console.In;
-
-                // try to treat s as path
-                if (TryGetFileInfo(s, out var fi)) return fi.OpenText();
-
-                // FIXME this is the part where we'll want to be more helpful 
-                throw new Exception("can't find that");
-            }
-
-            if (type == typeof(TextWriter) && s != null)
-            {
-                if (s == "-") return Console.Out;
-
-                // insist that a new file be created 
-                // not getting into the append / overwrite / confirm fun (yet)
-                var file = File.Open(s, FileMode.CreateNew);
-                return new StreamWriter(file);
-            }
-
-            // don't worry about if it exists
-            if (type == typeof(FileInfo) && s != null) return new FileInfo(s);
-            if (type == typeof(DirectoryInfo) && s != null) return new DirectoryInfo(s);
 
             return Convert.ChangeType(value, type);
         }
