@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ClassyCLI.Test")]
 namespace ClassyCLI
 {
     public class Runner
@@ -317,5 +318,9 @@ namespace ClassyCLI
             return fi.Exists;
         }
 
+        internal static IEnumerable<string> Complete(string line, int position, IEnumerable<Type> types)
+        {
+            return Enumerable.Empty<string>();
+        }
     }
 }

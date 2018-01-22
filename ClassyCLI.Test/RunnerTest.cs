@@ -14,19 +14,6 @@ namespace ClassyCLI.Test
         private static StringBuilder _sb;
         private static JsonConverter[] _converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter { } };
 
-        private static string GetFilePath([CallerFilePath] string path = "") => path;
-
-        private static string GetTypeName(Type t)
-        {
-            if (!t.IsGenericType) return t.FullName;
-
-            var name = t.FullName;
-            var ix = name.IndexOf('`');
-            name = name.Substring(0, ix);
-
-            return $"{name}<{string.Join(", ", t.GetGenericArguments().Select(a => GetTypeName(a)))}>";
-        }
-
         private static void Log<T>(T instance, object arguments, [CallerMemberName] string member = "")
         {
             _sb.AppendLine($"# Invoked {instance.GetType().Name} {member}");
@@ -41,7 +28,7 @@ namespace ClassyCLI.Test
 
             foreach (var param in args)
             {
-                _sb.AppendLine($"## {param.Name} {GetTypeName(param.ParameterType)}");
+                _sb.AppendLine($"## {param.Name} {param.ParameterType.GetTypeName()}");
                 _sb.AppendLine();
 
                 var value = argsType.GetProperty(param.Name).GetValue(arguments);
@@ -191,22 +178,7 @@ namespace ClassyCLI.Test
             // mixed positional and named params
             // enumerable parameter (it's very greedy)
 
-            Approve(_sb);
-        }
-
-        private static void Approve(StringBuilder sb, [CallerFilePath] string path = "", [CallerMemberName] string member = "", string extension = "md")
-        {
-            // FIXME use approval tests or something here
-            var approved = Path.ChangeExtension(path, $".{member}.approved.{extension}");
-            var received = Path.ChangeExtension(path, $".{member}.received.{extension}");
-
-            var actual = sb.ToString();
-            File.WriteAllText(received, actual);
-
-            Assert.Equal(expected: File.ReadAllText(approved), actual: actual, ignoreLineEndingDifferences: true);
-
-            // if assertion didn't throw then cleanup
-            File.Delete(received);
+            Approvals.Approve(_sb);
         }
 
         private void Run(string args, IEnumerable<Type> classes) => Run(args.Split((string[])null, StringSplitOptions.None), classes);
@@ -232,7 +204,7 @@ namespace ClassyCLI.Test
                 if (expectException != null && expectException.IsAssignableFrom(e.GetType()))
                 {
 
-                    _sb.AppendLine($"# Exception {GetTypeName(expectException)}");
+                    _sb.AppendLine($"# Exception {expectException.GetTypeName()}");
                     _sb.AppendLine();
                     _sb.AppendLine();
                     return;
