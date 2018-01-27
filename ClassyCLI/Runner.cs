@@ -235,7 +235,7 @@ namespace ClassyCLI
             var ix = name.IndexOfAny(_prefix);
             if (ix != 0) return false;
 
-            // remove leading and trainiling prefix characters
+            // remove leading and trailing prefix characters
             // technically remove them all -- super inefficient
             while (ix != -1)
             {

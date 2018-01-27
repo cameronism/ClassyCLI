@@ -177,6 +177,8 @@ Soon:
 
 - configuration / customization
 - shell completion snippet generation
+- numeric enum story
+- better flag enum support
 - (de)serialization support -- possibly in sibling package(s)
 
 
