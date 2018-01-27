@@ -115,8 +115,6 @@ _all TODO_
 
 ## Completion
 
-_TODO_
-
 By default, a first argument of `--complete` is used to get completions for use in PowerShell, bash or zsh 
 with minimal setup for your program.
 
@@ -155,6 +153,37 @@ complete -f -F _your_program_bash_complete your-program
 
 By default a first argument of `--complete-powershell`, `--complete-bash`, `--complete-zsh` will output a snippet
 suitable to append to your PowerShell profile, `.bashrc`, `.zshrc` respectively.
+
+
+## Next
+
+Before Publish:
+
+- boolean value completion
+- value completion for "collections of completables"
+- use TypeConverter
+- Task support
+- --help
+- print usage for insufficient args
+- coherent class / namespace usage story
+- coherent method name omission story
+- minimal `ClassyCLI.Run()`
+	- the right types
+	- --help
+	- --complete
+- cleanup README
+
+
+Soon:
+
+- configuration / customization
+- shell completion snippet generation
+- (de)serialization support -- possibly in sibling package(s)
+
+
+Someday:
+
+- custom value provider
 
 
 ## License
