@@ -131,22 +131,24 @@ namespace ClassyCLI
             }
         }
 
+        private static void SetComparison(bool ignoreCase)
+        {
+            _comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+            _ignoreCase = ignoreCase;
+        }
+
         public static void Run(string[] arguments, IEnumerable<Type> types)
         {
             // red, green, refactor
             // this is going to be stupid simple for a while
 
-            var ignoreCase = true; // TODO make param
-            _comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            _ignoreCase = ignoreCase;
+            // TODO make param
+            SetComparison(ignoreCase: true);
 
             var classArg = arguments[0];
             var methodArg = arguments[1];
 
-            var cls = types
-                .Where(m => m.Name.IndexOf(classArg, _comparison) != -1)
-                .Single();
-
+            var cls = GetClasses(types, classArg).Single();
 
             var method = cls.GetMethods()
                 .Where(m => m.Name.StartsWith(methodArg, _comparison))
@@ -211,6 +213,12 @@ namespace ClassyCLI
             }
 
             method.Invoke(instance, args);
+        }
+
+        private static IEnumerable<Type> GetClasses(IEnumerable<Type> types, string classArg)
+        {
+            return types
+                .Where(m => m.Name.IndexOf(classArg, _comparison) != -1);
         }
 
         static char[] _prefix = new[] { '-', '/', '@', '=' };
@@ -320,7 +328,163 @@ namespace ClassyCLI
 
         internal static IEnumerable<string> Complete(string line, int position, IEnumerable<Type> types)
         {
-            return Enumerable.Empty<string>();
+            // TODO make param
+            SetComparison(ignoreCase: true);
+
+            // class name
+            var arg = Argument.Parse(line);
+
+            // ignore everything after `position`
+            // doing anything intelligent based on what comes later sounds _very_ challenging
+            arg.Trim(position);
+
+            var classes = GetClasses(types, arg.Value).ToList();
+            if (classes.Count != 1 || arg.Next == null)
+            {
+                return classes.Select(GetClassName);
+            }
+
+            var cls = classes.Single();
+
+            // method name
+            arg = arg.Next;
+            var methods = cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+                .Where(m => OriginalDeclaringType(m) != typeof(object));
+
+            methods = Matching(methods, arg?.Value, m => m.Name);
+
+            if (arg?.Next == null)
+            {
+                return methods.Select(m => m.Name);
+            }
+
+            if (!TryGetSingle(methods, out var method))
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            // parameter names
+            arg = arg.Next;
+            var parameters = new List<ParameterInfo>(method.GetParameters());
+            ParameterInfo lastNamedParameter = null;
+            var positionalOnly = false;
+
+            while (arg.Next != null)
+            {
+                lastNamedParameter = null;
+
+                if (!positionalOnly && arg.Value == "--")
+                {
+                    positionalOnly = true;
+                }
+                else if (!positionalOnly && PossibleParameterName(arg.Value))
+                {
+                    // Span<char> -- sigh
+                    var value = arg.Value.Substring(1);
+
+                    var ix = parameters.FindIndex(p => p.Name.Equals(value, _comparison));
+                    if (ix != -1)
+                    {
+                        lastNamedParameter = parameters[ix];
+
+                        // don't consider this param name for completion anymore
+                        // TODO don't remove param if it supports multiple values
+                        parameters.RemoveAt(ix);
+                    }
+                }
+
+                arg = arg.Next;
+            }
+
+            if (!positionalOnly && ((arg.Value == "" && lastNamedParameter == null) || PossibleParameterName(arg.Value)))
+            {
+                // Span<char> -- sigh
+                var value = arg.Value.Length >= 1 ? arg.Value.Substring(1) : arg.Value;
+                return Matching(parameters.Select(p => p.Name), value).Select(p => '-' + p);
+            }
+
+            return GetParameterValueCompletions(arg, parameters, lastNamedParameter);
+        }
+
+        private static string GetClassName(Type t)
+        {
+            return t.Name;
+        }
+
+        private static Type OriginalDeclaringType(MethodInfo m)
+        {
+            if (!m.IsVirtual) return m.DeclaringType;
+
+            // FIXME this should really be recursive
+            var parameterTypes = m.GetParameters().Select(p => p.ParameterType).ToArray();
+            var b = m.DeclaringType.BaseType;
+            var bm = b?.GetMethod(m.Name, parameterTypes);
+
+            return bm != null ? b : m.DeclaringType;
+        }
+
+        private static IEnumerable<string> GetParameterValueCompletions(Argument arg, List<ParameterInfo> parameters, ParameterInfo named)
+        {
+            IEnumerable<string> values = null;
+            var param = named ?? parameters?.FirstOrDefault();
+            if (param != null)
+            {
+                values = GetValueCompletions(param.ParameterType, arg);
+            }
+
+            return values ?? Enumerable.Empty<string>();
+        }
+
+        private static IEnumerable<string> GetValueCompletions(Type type, Argument arg)
+        {
+            type = Nullable.GetUnderlyingType(type) ?? type;
+            if (type.IsEnum)
+            {
+                return Matching(Enum.GetNames(type), arg?.Value);
+            }
+
+            return null;
+        }
+
+        private static IEnumerable<string> Matching(IEnumerable<string> completions, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return completions;
+            }
+
+            return completions.Where(c => c.StartsWith(value, _comparison));
+        }
+
+        private static IEnumerable<T> Matching<T>(IEnumerable<T> completions, string value, Func<T, string> selector)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return completions;
+            }
+
+            return completions.Where(c => selector(c).StartsWith(value, _comparison));
+        }
+
+
+        private static bool TryGetSingle<T>(IEnumerable<T> items, out T item)
+        {
+            using (var enumerator = items.GetEnumerator())
+            {
+                if (!enumerator.MoveNext())
+                {
+                    item = default(T);
+                    return false;
+                }
+
+                item = enumerator.Current;
+                return !enumerator.MoveNext();
+            }
+        }
+
+        private static bool PossibleParameterName(string s)
+        {
+            return s?.Length >= 1 && Array.IndexOf(_prefix, s[0]) != -1;
         }
     }
 }
