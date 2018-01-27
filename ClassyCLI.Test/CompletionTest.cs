@@ -108,6 +108,10 @@ namespace ClassyCLI.Test
             Complete(types, "C3 M2 ");
             Complete(types, "C3 M3 ");
 
+            Complete(types, "C3 M3 -d szz", -3);
+            Complete(types, "C3 M3 -d szz", -2);
+            Complete(types, "C3 M3 -d szz", -1);
+
             Approvals.Approve(_sb);
         }
 
@@ -115,6 +119,8 @@ namespace ClassyCLI.Test
 
         private void Complete(Type[] types, string line, int position)
         {
+            if (position < 0) position = line.Length + position;
+
             _sb.AppendLine("```");
             _sb.AppendLine(line);
             for (int i = 0; i < position; i++)

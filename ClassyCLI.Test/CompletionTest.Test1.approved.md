@@ -449,3 +449,34 @@ C3 M3
 -d
 
 
+```
+C3 M3 -d szz
+         ^
+```
+
+Sunday
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+
+
+```
+C3 M3 -d szz
+          ^
+```
+
+Sunday
+Saturday
+
+
+```
+C3 M3 -d szz
+           ^
+```
+
+_no completions_
+
+

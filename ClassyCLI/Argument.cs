@@ -98,7 +98,7 @@ namespace ClassyCLI
                 }
                 else
                 {
-                    next.Value = next.Value.Substring(0, position - tail.Offset);
+                    next.Value = next.Value.Substring(0, position - next.Offset);
                 }
             }
             else
