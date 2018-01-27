@@ -480,3 +480,38 @@ C3 M3 -d szz
 _no completions_
 
 
+```
+C3 M4 -b t
+          ^
+```
+
+true
+
+
+```
+C3 M4 -b 
+         ^
+```
+
+true
+false
+
+
+```
+C3 M5 -b n
+          ^
+```
+
+null
+
+
+```
+C3 M5 -b 
+         ^
+```
+
+true
+false
+null
+
+

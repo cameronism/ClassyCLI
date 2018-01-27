@@ -264,10 +264,22 @@ namespace ClassyCLI
             }
 
             var underlying = Nullable.GetUnderlyingType(destination);
-            if (underlying != null && s == "")
+            if (underlying != null)
             {
-                // leave param null
-                return null;
+                if (s == "")
+                {
+                    // leave param null
+                    return null;
+                }
+                else if (string.Equals(s, "null", _comparison))
+                {
+                    if (underlying == typeof(bool))
+                    {
+                        return null;
+                    }
+
+                    // TODO there are probably a lot more types where should turn the string "null" to `null`
+                }
             }
 
             var type = underlying ?? destination;
@@ -437,11 +449,33 @@ namespace ClassyCLI
 
         private static IEnumerable<string> GetValueCompletions(Type type, Argument arg)
         {
+            var original = type;
             type = Nullable.GetUnderlyingType(type) ?? type;
+
+            IEnumerable<string> values = null;
             if (type.IsEnum)
             {
-                return Matching(Enum.GetNames(type), arg?.Value);
+                values = Enum.GetNames(type);
             }
+            else if (type == typeof(bool))
+            {
+                if (original == type)
+                {
+                    values = new[] { "true", "false" };
+                }
+                else
+                {
+                    values = new[] { "true", "false", "null" };
+                }
+            }
+
+            // may want to handle the filtering differently for custom value completers
+
+            if (values != null)
+            {
+                return Matching(values, arg?.Value);
+            }
+
 
             return null;
         }

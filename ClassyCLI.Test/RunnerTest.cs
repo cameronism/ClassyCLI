@@ -70,6 +70,8 @@ namespace ClassyCLI.Test
             public void OH(IEnumerable<int> ii) => Log(this, new { ii });
             public void OI(string s, IList<DateTime> dd) => Log(this, new { s, dd });
             public void OJ(IEnumerable<int> ii = null) => Log(this, new { ii });
+            public void OK(bool b) => Log(this, new { b });
+            public void OL(bool? b) => Log(this, new { b });
         }
 
         private class E2 : E1
@@ -160,6 +162,9 @@ namespace ClassyCLI.Test
             Run("E2 TwoVoid", types);
 
 
+            Run("E1 OK true", types);
+            Run("E1 OL true", types);
+            Run("E1 OL null", types);
 
             // optional class or method names 
             // - (sometimes) 

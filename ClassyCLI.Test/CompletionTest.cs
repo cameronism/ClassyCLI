@@ -36,6 +36,8 @@ namespace ClassyCLI.Test
             public void M1(int foo = 0, int bar = 0) { }
             public void M2(DayOfWeek d) { }
             public void M3(DayOfWeek? d) { }
+            public void M4(bool b) { }
+            public void M5(bool? b) { }
 
             // System.DateTimeKind is another "simple" enum
         }
@@ -111,6 +113,11 @@ namespace ClassyCLI.Test
             Complete(types, "C3 M3 -d szz", -3);
             Complete(types, "C3 M3 -d szz", -2);
             Complete(types, "C3 M3 -d szz", -1);
+
+            Complete(types, "C3 M4 -b t");
+            Complete(types, "C3 M4 -b ");
+            Complete(types, "C3 M5 -b n");
+            Complete(types, "C3 M5 -b ");
 
             Approvals.Approve(_sb);
         }

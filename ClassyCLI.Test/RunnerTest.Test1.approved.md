@@ -449,3 +449,30 @@ null
 # Invoked E2 TwoVoid
 
 
+# Running E1 OK true
+
+# Invoked E1 OK
+
+## b System.Boolean
+
+true
+
+
+# Running E1 OL true
+
+# Invoked E1 OL
+
+## b System.Nullable<System.Boolean>
+
+true
+
+
+# Running E1 OL null
+
+# Invoked E1 OL
+
+## b System.Nullable<System.Boolean>
+
+null
+
+
