@@ -160,6 +160,7 @@ suitable to append to your PowerShell profile, `.bashrc`, `.zshrc` respectively.
 Before Publish:
 
 - completion argument parsing
+	- find differences (if any) in supported shells, may need quoting flavors
 	- quotes
 	- other special char
 - --help
