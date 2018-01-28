@@ -59,19 +59,12 @@ namespace ClassyCLI
 
             private static Parameter CreateParameter(ParameterInfo info)
             {
-                var type = info.ParameterType;
-                Type ienumerable = null;
-                if (type != typeof(string))
+                if (TryGetEnumerableItem(info.ParameterType, out var item))
                 {
-                    ienumerable = new[] { type }
-                        .Concat(type.GetInterfaces())
-                        .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+                    return new EnumerableParameter(_createList.MakeGenericMethod(item, info.ParameterType));
                 }
 
-                if (ienumerable == null) return new Parameter();
-
-                var item = ienumerable.GetGenericArguments()[0];
-                return new EnumerableParameter(_createList.MakeGenericMethod(item, type));
+                return new Parameter();
             }
 
         }
@@ -399,9 +392,13 @@ namespace ClassyCLI
                     {
                         lastNamedParameter = parameters[ix];
 
-                        // don't consider this param name for completion anymore
-                        // TODO don't remove param if it supports multiple values
-                        parameters.RemoveAt(ix);
+                        // TODO cache MRU? *very* likely we're repeating the same call to TryGetEnumerableItem
+                        if (!TryGetEnumerableItem(lastNamedParameter.ParameterType, out var itemType))
+                        {
+                            // don't consider this param name for completion anymore
+                            // don't remove param if it supports multiple values
+                            parameters.RemoveAt(ix);
+                        }
                     }
                 }
 
@@ -449,6 +446,12 @@ namespace ClassyCLI
 
         private static IEnumerable<string> GetValueCompletions(Type type, Argument arg)
         {
+            if (TryGetEnumerableItem(type, out var item))
+            {
+                // do all completions based on item type
+                type = item;
+            }
+
             var original = type;
             type = Nullable.GetUnderlyingType(type) ?? type;
 
@@ -519,6 +522,26 @@ namespace ClassyCLI
         private static bool PossibleParameterName(string s)
         {
             return s?.Length >= 1 && Array.IndexOf(_prefix, s[0]) != -1;
+        }
+
+        private static bool TryGetEnumerableItem(Type type, out Type item)
+        {
+            Type ienumerable = null;
+            if (type != typeof(string))
+            {
+                ienumerable = new[] { type }
+                    .Concat(type.GetInterfaces())
+                    .FirstOrDefault(t => t.IsGenericType && t.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+            }
+
+            if (ienumerable == null)
+            {
+                item = null;
+                return false;
+            }
+
+            item = ienumerable.GetGenericArguments()[0];
+            return true;
         }
     }
 }

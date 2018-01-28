@@ -159,7 +159,6 @@ suitable to append to your PowerShell profile, `.bashrc`, `.zshrc` respectively.
 
 Before Publish:
 
-- value completion for "collections of completables"
 - use TypeConverter
 - Task support
 - --help
@@ -184,7 +183,7 @@ Soon:
 
 Someday:
 
-- custom value provider
+- custom completion value provider
 
 
 ## License

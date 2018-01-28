@@ -515,3 +515,31 @@ false
 null
 
 
+```
+C3 M6 -d 
+         ^
+```
+
+Sunday
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+
+
+```
+C3 M6 -d Sunday -d 
+                   ^
+```
+
+Sunday
+Monday
+Tuesday
+Wednesday
+Thursday
+Friday
+Saturday
+
+
