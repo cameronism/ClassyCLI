@@ -159,7 +159,6 @@ suitable to append to your PowerShell profile, `.bashrc`, `.zshrc` respectively.
 
 Before Publish:
 
-- Task support
 - completion argument parsing
 	- quotes
 	- other special char

@@ -7,6 +7,8 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Xunit;
 using System.ComponentModel;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace ClassyCLI.Test
 {
@@ -14,6 +16,8 @@ namespace ClassyCLI.Test
     {
         private static StringBuilder _sb;
         private static JsonConverter[] _converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter { } };
+        private static Task _task;
+        private static ValueTask<object> _valueTask; // oh the irony
 
         private static void Log<T>(T instance, object arguments, [CallerMemberName] string member = "")
         {
@@ -74,6 +78,8 @@ namespace ClassyCLI.Test
             public void OK(bool b) => Log(this, new { b });
             public void OL(bool? b) => Log(this, new { b });
             public void OM(CustomType ct) => Log(this, new { ct });
+            public Task ON() { Log(this, new { }); return _task; }
+            public ValueTask<object> OO() { Log(this, new { }); return _valueTask; }
         }
 
         private class E2 : E1
@@ -188,22 +194,29 @@ namespace ClassyCLI.Test
 
             Run("E1 OM foo", types);
 
-            // optional class or method names 
-            // - (sometimes) 
-            // - or just ignore class names and assume method name is first
-            // completion
-            // help
-            // help for incomplete params
-            // runme attribute
-            // marker interface
+
+            // Task
+            var tcs = new TaskCompletionSource<object>();
+            ThreadPool.QueueUserWorkItem(delegate { Thread.Sleep(1); tcs.SetResult(null); });
+            _task = tcs.Task;
+            Run("E1 ON", types);
+            _sb.AppendLine(tcs.Task.Status.ToString());
+            _sb.AppendLine();
+            _sb.AppendLine();
+            _task = null;
 
 
-            // multiple classes
-            // optional / default params
-            // stdin and file names to Stream or StreamReader param
-            // named params at cli
-            // mixed positional and named params
-            // enumerable parameter (it's very greedy)
+            // Value Task
+            tcs = new TaskCompletionSource<object>();
+            ThreadPool.QueueUserWorkItem(delegate { Thread.Sleep(1); tcs.SetResult(null); });
+            _valueTask = new ValueTask<object>(tcs.Task);
+            Run("E1 OO", types);
+            _sb.AppendLine(tcs.Task.Status.ToString());
+            _sb.AppendLine();
+            _sb.AppendLine();
+            _valueTask = default(ValueTask<object>);
+
+
 
             Approvals.Approve(_sb);
         }

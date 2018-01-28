@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: System.Runtime.CompilerServices.InternalsVisibleTo("ClassyCLI.Test")]
 namespace ClassyCLI
@@ -206,7 +208,37 @@ namespace ClassyCLI
                 param.SetValue(paramInfo.DefaultValue);
             }
 
-            method.Invoke(instance, args);
+            var result = method.Invoke(instance, args);
+            if (result != null)
+            {
+                HandleReturnValue(result, method.ReturnType);
+            }
+        }
+
+        private static void HandleReturnValue(object result, Type returnType)
+        {
+            // slowly, painfully, as safely as (reasonably) possible, check for "awaitable" pattern then block on it
+            // technically GetResult and ConfigureAwait are not required to be "awaitable" but ValueTask and Task support it so use that
+            var configureAwait = returnType.GetMethod("ConfigureAwait", BindingFlags.Instance | BindingFlags.Public, null, new [] { typeof(bool) }, null);
+
+            if (
+                configureAwait != null &&
+                TryGetMethod(configureAwait.ReturnType, "GetAwaiter", out var getAwaiter) &&
+                typeof(ICriticalNotifyCompletion).IsAssignableFrom(getAwaiter.ReturnType) &&
+                TryGetMethod(getAwaiter.ReturnType, "GetResult", out var getResult))
+            {
+                var configured = configureAwait.Invoke(result, new object[] { false });
+                var awaiter = getAwaiter.Invoke(configured, null);
+                result = getResult.Invoke(awaiter, null);
+                returnType = getResult.ReturnType;
+            }
+        }
+
+        // Try to get public parameterless instance method
+        private static bool TryGetMethod(Type type, string methodName, out MethodInfo mi)
+        {
+            mi = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null);
+            return mi != null;
         }
 
         private static IEnumerable<Type> GetClasses(IEnumerable<Type> types, string classArg)
