@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Xunit;
+using System.ComponentModel;
 
 namespace ClassyCLI.Test
 {
@@ -72,11 +73,30 @@ namespace ClassyCLI.Test
             public void OJ(IEnumerable<int> ii = null) => Log(this, new { ii });
             public void OK(bool b) => Log(this, new { b });
             public void OL(bool? b) => Log(this, new { b });
+            public void OM(CustomType ct) => Log(this, new { ct });
         }
 
         private class E2 : E1
         {
             public void TwoVoid() => Log(this, new { });
+        }
+
+        [TypeConverter(typeof(CustomTypeConverter)), Newtonsoft.Json.JsonObject]
+        private class CustomType
+        {
+            [Newtonsoft.Json.JsonProperty]
+            public string Value { get; set; }
+
+            public CustomType(string value)
+            {
+                Value = value;
+            }
+        }
+
+        private class CustomTypeConverter : TypeConverter
+        {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) => sourceType == typeof(string);
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) => new CustomType((string)value);
         }
 
         [Fact]
@@ -165,6 +185,8 @@ namespace ClassyCLI.Test
             Run("E1 OK true", types);
             Run("E1 OL true", types);
             Run("E1 OL null", types);
+
+            Run("E1 OM foo", types);
 
             // optional class or method names 
             // - (sometimes) 

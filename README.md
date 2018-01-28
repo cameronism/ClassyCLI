@@ -159,8 +159,10 @@ suitable to append to your PowerShell profile, `.bashrc`, `.zshrc` respectively.
 
 Before Publish:
 
-- use TypeConverter
 - Task support
+- completion argument parsing
+	- quotes
+	- other special char
 - --help
 - print usage for insufficient args
 - coherent class / namespace usage story
@@ -174,6 +176,7 @@ Before Publish:
 
 Soon:
 
+- completion for file names (if shell doesn't do it for us?)
 - configuration / customization
 - shell completion snippet generation
 - numeric enum story

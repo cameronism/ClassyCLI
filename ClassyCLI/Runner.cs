@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -320,8 +321,24 @@ namespace ClassyCLI
                 // don't worry about if it exists
                 if (type == typeof(FileInfo)) return new FileInfo(s);
                 if (type == typeof(DirectoryInfo)) return new DirectoryInfo(s);
+
+                // strings are objects -- have fun
+                if (type == typeof(object)) return value;
+
+                // finally do the TypeConverter dance
+                var converter = TypeDescriptor.GetConverter(type);
+                if (converter.CanConvertFrom(typeof(string)))
+                {
+                    return converter.ConvertFromString(s);
+                }
+                else
+                {
+                    // FIXME this is the part where we'll want to be more helpful 
+                    throw new Exception("this will never work");
+                }
             }
 
+            // only non-strings should be left - which should be from DefaultAttribute
             return Convert.ChangeType(value, type);
         }
 

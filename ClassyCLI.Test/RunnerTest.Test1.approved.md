@@ -476,3 +476,14 @@ true
 null
 
 
+# Running E1 OM foo
+
+# Invoked E1 OM
+
+## ct ClassyCLI.Test.RunnerTest+CustomType
+
+{
+  "Value": "foo"
+}
+
+
