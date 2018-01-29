@@ -159,10 +159,6 @@ suitable to append to your PowerShell profile, `.bashrc`, `.zshrc` respectively.
 
 Before Publish:
 
-- completion argument parsing
-	- find differences (if any) in supported shells, may need quoting flavors
-	- quotes
-	- other special char
 - --help
 - print usage for insufficient args
 - coherent class / namespace usage story
@@ -176,9 +172,12 @@ Before Publish:
 
 Soon:
 
-- completion for file names (if shell doesn't do it for us?)
 - configuration / customization
 - shell completion snippet generation
+- completion for file names (if shell doesn't do it for us?)
+- completion argument parsing of escaped quotes inside quoted strings
+	- the "unix" shells and powershell handle this very differently
+	- "regular" double and single quoted strings already work
 - numeric enum story
 - better flag enum support
 - (de)serialization support -- possibly in sibling package(s)

@@ -41,10 +41,29 @@ namespace ClassyCLI.Test
             Parse("'foo bar bop' 'baz ' 'a'");
             Parse("'foo bar bop' 'baz' 'a b'");
             Parse("\"\"");
+            Parse(" \"\"");
+            Parse(" \"\" ");
+            Parse("\"\" \"\"");
+            Parse("\"\" \"\" \"\"");
+            Parse("''");
+            Parse(" ''");
+            Parse(" '' ");
+            Parse("'' ''");
+            Parse("'' '' ''");
+            Parse("' ' \" \" ' '");
+            Parse("' ' \" \" '\"' \"'\"");
+            Parse("  foo  ' bar '  \"  bop  \"");
+
+            // incomplete quoted strings
+            Parse("foo 'bar");
+            Parse("foo \"bar");
+            Parse("' bar");
+            Parse("\" bar");
+            Parse("' bar ");
+            Parse("\" bar ");
+
 
             // FIXME
-            // single quotes
-            // double quotes
             // back slashes
             // needs to work in powershell, bash and zsh
 
@@ -60,7 +79,7 @@ namespace ClassyCLI.Test
             var arg = Argument.Parse(line);
             while (arg != null)
             {
-                _sb.AppendLine($"{arg.Offset:d2} {arg.Value}");
+                _sb.AppendLine($"{arg.Offset:d2} {arg.Value.Length:d2} {arg.Value}");
                 arg = arg.Next;
             }
 

@@ -31,6 +31,7 @@ namespace ClassyCLI
                 };
             }
 
+            var prev = ' ';
             var sep = line[ix];
             if (sep != ' ') seps = null;
 
@@ -39,7 +40,7 @@ namespace ClassyCLI
             while (true)
             {
                 var len = ix - last;
-                if (len > 0)
+                if (len > 0 || (sep == prev && sep != ' '))
                 {
                     SetArgument(ref arg, ref first, line.Substring(last, len), last);
                 }
@@ -55,6 +56,7 @@ namespace ClassyCLI
                     break;
                 }
 
+                prev = sep;
                 sep = line[ix];
                 if (seps == null)
                 {
