@@ -24,6 +24,23 @@ namespace ClassyCLI.Test
             Parse(" foo ");
             Parse("  foo  bar  ");
             Parse("  foo  ");
+            Parse("\"foo bar bop\"");
+            Parse("\"foo bar bop\" baz");
+            Parse("\"foo bar bop\" baz a");
+            Parse("\"foo bar bop\" \"baz\" a");
+            Parse("\"foo bar bop\" \"baz\" \"a\"");
+            Parse("\"foo bar bop\" \" baz\" \"a\"");
+            Parse("\"foo bar bop\" \"baz \" \"a\"");
+            Parse("\"foo bar bop\" \"baz\" \"a b\"");
+            Parse("'foo bar bop'");
+            Parse("'foo bar bop' baz");
+            Parse("'foo bar bop' baz a");
+            Parse("'foo bar bop' 'baz' a");
+            Parse("'foo bar bop' 'baz' 'a'");
+            Parse("'foo bar bop' ' baz' 'a'");
+            Parse("'foo bar bop' 'baz ' 'a'");
+            Parse("'foo bar bop' 'baz' 'a b'");
+            Parse("\"\"");
 
             // FIXME
             // single quotes

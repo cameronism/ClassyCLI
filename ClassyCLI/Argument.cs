@@ -18,7 +18,9 @@ namespace ClassyCLI
         public static Argument Parse(string line)
         {
             Argument arg = null;
-            var ix = line.IndexOf(' ');
+            var all = new [] { ' ', '"', '\'' };
+            var seps = all;
+            var ix = line.IndexOfAny(seps);
 
             if (ix == -1)
             {
@@ -28,6 +30,9 @@ namespace ClassyCLI
                     Offset = 0,
                 };
             }
+
+            var sep = line[ix];
+            if (sep != ' ') seps = null;
 
             var first = arg;
             var last = 0;
@@ -40,7 +45,7 @@ namespace ClassyCLI
                 }
                 last = ix + 1;
 
-                ix = line.IndexOf(' ', last);
+                ix = seps == null ? line.IndexOf(sep, last) : line.IndexOfAny(seps, last);
                 if (ix == -1)
                 {
                     if (last < line.Length)
@@ -48,6 +53,16 @@ namespace ClassyCLI
                         SetArgument(ref arg, ref first, line.Substring(last), last);
                     }
                     break;
+                }
+
+                sep = line[ix];
+                if (seps == null)
+                {
+                    seps = all;
+                }
+                else if (sep != ' ') 
+                {
+                    seps = null;
                 }
             }
 
