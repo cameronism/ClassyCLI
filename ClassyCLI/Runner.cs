@@ -72,6 +72,16 @@ namespace ClassyCLI
 
         }
 
+        internal static void Help(IEnumerable<Type> types, string line, TextWriter tw)
+        {
+            tw.WriteLine("commands:");
+            foreach (var type in types)
+            {
+                var description = type.GetCustomAttribute<DescriptionAttribute>();
+                tw.WriteLine("  {0,-17}{1}", GetClassName(type).ToLowerInvariant(), description?.Description);
+            }
+        }
+
         class EnumerableParameter : Parameter
         {
             private ParameterList _list;
