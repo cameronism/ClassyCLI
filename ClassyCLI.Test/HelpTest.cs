@@ -21,11 +21,23 @@ namespace ClassyCLI.Test
         [Description("This is the foo")]
         public class Foo
         {
+            public static void Run(int number, DayOfWeek day) { }
         }
 
         [Description("The bar stuff")]
         public class Bar
         {
+            public static void Run(
+                [Description("Really a number")] int number = 0, 
+                [Description("A date for something")] DateTime? timestamp = null) { }
+        }
+
+        /// <summary>
+        /// mmmmmmmm
+        /// </summary>
+        public class Bop
+        {
+
         }
 
         [Fact]
@@ -33,6 +45,8 @@ namespace ClassyCLI.Test
         {
             var types = new[] { typeof(Foo), typeof(Bar) };
             Run(types, "--help");
+            Run(types, "foo --help");
+            Run(types, "bar --help");
 
             Approvals.Approve(_sb);
         }
@@ -44,7 +58,9 @@ namespace ClassyCLI.Test
             _tw.WriteLine("```");
             _tw.WriteLine();
 
-            Runner.Help(types, line, _tw);
+            var arg = Argument.Parse(line);
+            arg = arg.Remove("--help");
+            Runner.Help(types, arg, _tw);
 
             _tw.WriteLine();
             _tw.WriteLine();

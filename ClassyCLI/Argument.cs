@@ -71,6 +71,33 @@ namespace ClassyCLI
             return first;
         }
 
+        // unconditionally remove first occurence of value
+        // this is probably not usable in the general `Run` case since presumably context will matter
+        public Argument Remove(string value)
+        {
+            var arg = this;
+            var head = arg;
+            Argument prev = null;
+            while (arg != null && !string.Equals(arg.Value, value, StringComparison.Ordinal))
+            {
+                prev = arg;
+                arg = arg.Next;
+            }
+
+            if (arg != null)
+            {
+                // match was head
+                if (prev == null)
+                {
+                    return arg.Next;
+                }
+
+                prev.Next = arg.Next;
+            }
+
+            return head;
+        }
+
         private static void SetArgument(ref Argument arg, ref Argument first, string value, int offset)
         {
             var next = new Argument

@@ -72,16 +72,6 @@ namespace ClassyCLI
 
         }
 
-        internal static void Help(IEnumerable<Type> types, string line, TextWriter tw)
-        {
-            tw.WriteLine("commands:");
-            foreach (var type in types)
-            {
-                var description = type.GetCustomAttribute<DescriptionAttribute>();
-                tw.WriteLine("  {0,-17}{1}", GetClassName(type).ToLowerInvariant(), description?.Description);
-            }
-        }
-
         class EnumerableParameter : Parameter
         {
             private ParameterList _list;
@@ -412,8 +402,7 @@ namespace ClassyCLI
 
             // method name
             arg = arg.Next;
-            var methods = cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-                .Where(m => OriginalDeclaringType(m) != typeof(object));
+            IEnumerable<MethodInfo> methods = GetMethods(cls);
 
             methods = Matching(methods, arg?.Value, m => m.Name);
 
@@ -472,6 +461,12 @@ namespace ClassyCLI
             }
 
             return GetParameterValueCompletions(arg, parameters, lastNamedParameter);
+        }
+
+        private static IEnumerable<MethodInfo> GetMethods(Type cls)
+        {
+            return cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
+                .Where(m => OriginalDeclaringType(m) != typeof(object));
         }
 
         private static string GetClassName(Type t)
@@ -601,6 +596,81 @@ namespace ClassyCLI
 
             item = ienumerable.GetGenericArguments()[0];
             return true;
+        }
+
+        // precondition: `--help` argument has already been removed.  may care about the position someday
+        internal static void Help(IEnumerable<Type> types, Argument arg, TextWriter tw)
+        {
+            string name, description;
+
+            if (arg == null)
+            {
+                tw.WriteLine("commands:");
+                foreach (var type in types)
+                {
+                    DescribeClass(type, out name, out description);
+                    tw.WriteLine("  {0,-17}{1}", name, description);
+                }
+                return;
+            }
+
+            SetComparison(ignoreCase: true);
+
+            var cls = Matching(types, arg.Value, t => t.Name).Single();
+            DescribeClass(cls, out name, out description);
+            tw.WriteLine("{0,-19}{1}", name, description);
+            tw.WriteLine();
+
+            var method = GetMethods(cls).Single();
+
+            tw.WriteLine("arguments:");
+            foreach (var param in method.GetParameters())
+            {
+                tw.WriteLine("  -{0,-16}{1}", param.Name, DescribeParameter(param));
+            }
+        }
+
+        private static string DescribeParameter(ParameterInfo param)
+        {
+            // FIXME try to get description
+
+            var type = param.ParameterType;
+            if (type.IsEnum)
+            {
+                return string.Join(" | ", Enum.GetNames(type));
+            }
+
+            var typeCode = Type.GetTypeCode(type);
+            switch (typeCode)
+            {
+                case TypeCode.Boolean:
+                case TypeCode.Byte:
+                case TypeCode.Char:
+                case TypeCode.DateTime:
+                case TypeCode.Decimal:
+                case TypeCode.Double:
+                case TypeCode.Int16:
+                case TypeCode.Int32:
+                case TypeCode.Int64:
+                case TypeCode.SByte:
+                case TypeCode.Single:
+                case TypeCode.String:
+                case TypeCode.UInt16:
+                case TypeCode.UInt32:
+                case TypeCode.UInt64:
+                    // _slightly_ better than nothing
+                    return typeCode.ToString();
+            }
+
+            // _hopefully_ better than nothing
+            return type.FullName;
+        }
+
+        private static void DescribeClass(Type type, out string name, out string description)
+        {
+            var attr = type.GetCustomAttribute<DescriptionAttribute>();
+            name = GetClassName(type).ToLowerInvariant();
+            description = attr?.Description;
         }
     }
 }
