@@ -43,6 +43,11 @@ namespace ClassyCLI.Test
         [Fact]
         public void Test1()
         {
+            using (var s = File.OpenRead("/Users/cameron/code/ClassyCLI/ClassyCLI.Test/bin/Debug/netcoreapp2.0/ClassyCLI.Test.xml"))
+            {
+                XmlDocumentation.ParseMembers(s);
+            }
+
             var types = new[] { typeof(Foo), typeof(Bar) };
             Run(types, "--help");
             Run(types, "foo --help");
