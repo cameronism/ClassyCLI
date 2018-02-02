@@ -632,7 +632,13 @@ namespace ClassyCLI
 
         private static string DescribeParameter(ParameterInfo param)
         {
-            // FIXME try to get description
+            var attr = param.GetCustomAttribute<DescriptionAttribute>();
+            if (attr != null)
+            {
+                return attr.Description;
+            }
+
+            // FIXME try to get xml docs
 
             var type = param.ParameterType;
             if (type.IsEnum)
@@ -670,7 +676,36 @@ namespace ClassyCLI
         {
             var attr = type.GetCustomAttribute<DescriptionAttribute>();
             name = GetClassName(type).ToLowerInvariant();
-            description = attr?.Description;
+
+            if (attr != null)
+            {
+                description = attr.Description;
+                return;
+            }
+
+            var docs = XmlDocumentation.GetDocumentation(type);
+            if (docs != null && TryGetValue(docs, XmlDocumentation.Summary, out description))
+            {
+                description = XmlDocumentation.GetFirstLine(description);
+                return;
+            }
+
+            description = null;
+        }
+
+        private static bool TryGetValue(KeyValuePair<string, string>[] docs, string summary, out string description)
+        {
+            foreach (var kvp in docs)
+            {
+                if (string.Equals(kvp.Key, summary, StringComparison.Ordinal))
+                {
+                    description = kvp.Value;
+                    return true;
+                }
+            }
+
+            description = null;
+            return false;
         }
     }
 }

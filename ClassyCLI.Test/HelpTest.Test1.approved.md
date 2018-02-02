@@ -29,3 +29,13 @@ arguments:
   -timestamp       A date for something
 
 
+```
+--help
+```
+
+commands:
+  foo              This is the foo
+  bar              The bar stuff
+  bop              mmmmmmmm
+
+
