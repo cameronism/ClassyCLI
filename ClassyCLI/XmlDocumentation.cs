@@ -15,19 +15,61 @@ namespace ClassyCLI
         private static object _lock = new object();
         private static Dictionary<string, Dictionary<string, KeyValuePair<string, string>[]>> _assemblies;
 
-
-        public static KeyValuePair<string, string>[] GetDocumentation(Type type)
+        public static KeyValuePair<string, string>[] GetDocumentation(MethodInfo method)
         {
+            var type = method.DeclaringType;
             var members = GetMembers(type.Assembly);
             if (members == null) return null;
 
-            var key = "T:" + type.FullName.Replace('+', '.');
+            var key = "M:" + GetTypeName(type) + "." +  method.Name + "(";
+            var parameters = method.GetParameters();
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                if (i > 0) key += ',';
+                key += GetTypeName(parameters[i].ParameterType);
+            }
+            key += ')';
+
             if (members.TryGetValue(key, out var docs))
             {
                 return docs;
             }
 
             return null;
+        }
+
+        public static KeyValuePair<string, string>[] GetDocumentation(Type type)
+        {
+            var members = GetMembers(type.Assembly);
+            if (members == null) return null;
+
+            var key = "T:" + GetTypeName(type);
+            if (members.TryGetValue(key, out var docs))
+            {
+                return docs;
+            }
+
+            return null;
+        }
+
+        private static string GetTypeName(Type t)
+        {
+            var name = t.FullName.Replace('+', '.');
+            if (!t.IsGenericType) return name;
+
+            var ix = name.IndexOf('`');
+            if (ix == -1) return name; // reachable?
+
+            name = name.Substring(0, ix);
+            name += '{';
+            var types = t.GetGenericArguments();
+            for (int i = 0; i < types.Length; i++)
+            {
+                if (i > 0) name += ',';
+                name += GetTypeName(types[i]);
+            }
+            name += '}';
+            return name;
         }
 
         private static Dictionary<string, KeyValuePair<string, string>[]> GetMembers(Assembly a)
@@ -116,6 +158,11 @@ namespace ClassyCLI
         private static KeyValuePair<string, string> ParseMember(XmlReader reader)
         {
             var key = reader.LocalName;
+            if (string.Equals(key, "param", StringComparison.Ordinal))
+            {
+                key = "param:" + reader.GetAttribute("name");
+            }
+
             reader.MoveToContent();
 
             // you're gonna wanna trim that

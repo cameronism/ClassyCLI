@@ -39,3 +39,24 @@ commands:
   bop              mmmmmmmm
 
 
+```
+bop --help
+```
+
+bop                mmmmmmmm
+
+arguments:
+  -number          another number
+  -timestamp       more stuff
+
+
+```
+baz --help
+```
+
+baz                
+
+arguments:
+  -s               more stuff
+
+

@@ -8,6 +8,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netcoreapp2.0\ClassyCLI.Test.xml</DocumentationFile>
+    <NoWarn>1591</NoWarn>  
   </PropertyGroup>
 
   <ItemGroup>

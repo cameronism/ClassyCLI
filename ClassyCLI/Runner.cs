@@ -622,15 +622,16 @@ namespace ClassyCLI
             tw.WriteLine();
 
             var method = GetMethods(cls).Single();
+            var xml = XmlDocumentation.GetDocumentation(method);
 
             tw.WriteLine("arguments:");
             foreach (var param in method.GetParameters())
             {
-                tw.WriteLine("  -{0,-16}{1}", param.Name, DescribeParameter(param));
+                tw.WriteLine("  -{0,-16}{1}", param.Name, DescribeParameter(param, xml));
             }
         }
 
-        private static string DescribeParameter(ParameterInfo param)
+        private static string DescribeParameter(ParameterInfo param, KeyValuePair<string, string>[] xml)
         {
             var attr = param.GetCustomAttribute<DescriptionAttribute>();
             if (attr != null)
@@ -638,7 +639,10 @@ namespace ClassyCLI
                 return attr.Description;
             }
 
-            // FIXME try to get xml docs
+            if (xml != null && TryGetValue(xml, "param:" + param.Name, out var description))
+            {
+                return description;
+            }
 
             var type = param.ParameterType;
             if (type.IsEnum)

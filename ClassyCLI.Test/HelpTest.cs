@@ -37,7 +37,18 @@ namespace ClassyCLI.Test
         /// </summary>
         public class Bop
         {
+            /// <summary>
+            /// do run run
+            /// </summary>
+            /// <param name="number">another number</param>
+            /// <param name="timestamp">more stuff</param>
+            public static void Run(int number = 0, DateTime? timestamp = null) { }
+        }
 
+        public class Baz
+        {
+            /// <param name="s">more stuff</param>
+            public static void Run(string s) { }
         }
 
         [Fact]
@@ -50,7 +61,10 @@ namespace ClassyCLI.Test
 
             types = new[] { typeof(Foo), typeof(Bar), typeof(Bop) };
             Run(types, "--help");
+            Run(types, "bop --help");
 
+            types = new[] { typeof(Foo), typeof(Bar), typeof(Bop), typeof(Baz) };
+            Run(types, "baz --help");
 
             Approvals.Approve(_sb);
         }
