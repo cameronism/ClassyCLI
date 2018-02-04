@@ -52,6 +52,7 @@ namespace ClassyCLI
             return null;
         }
 
+        // may want to switch to a string builder (param)
         private static string GetTypeName(Type t)
         {
             var name = t.FullName.Replace('+', '.');

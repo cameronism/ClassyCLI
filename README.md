@@ -76,6 +76,7 @@ One off console app "scripts", power user swiss army knives, and everything in b
 		- etc
 		Collections are "greedy" when used positionally but not when used by name
 - extensive return type support
+- async method support
 
 TODO: 
 
@@ -89,7 +90,6 @@ TODO:
 - marker interface
 - deserialize stdin from json or csv (or maybe even xml)
 - serialize return value to stdout as json or csv (or maybe that other one)
-- async method support
 
 
 ## Configuration
