@@ -711,5 +711,47 @@ namespace ClassyCLI
             description = null;
             return false;
         }
+
+        internal static string CommonPrefix(IEnumerable<string> names)
+        {
+            var sep = new[] { '.', '+', '`' };
+            string prefix = null;
+            using (var e = names.GetEnumerator())
+            {
+                if (!e.MoveNext()) return null;
+                prefix = e.Current;
+
+                var ix = prefix.LastIndexOfAny(sep, prefix.Length - 2);
+                prefix = ix > 0 ? prefix.Substring(0, ix + 1) : "";
+
+                while (e.MoveNext() && prefix.Length > 0)
+                {
+                    var name = e.Current;
+                    if (!name.StartsWith(prefix, StringComparison.Ordinal))
+                    {
+                        prefix = CommonPrefix(prefix, name, sep);
+                    }
+                }
+            }
+
+            return prefix;
+        }
+
+        internal static string CommonPrefix(string prefix, string name, char[] sep)
+        {
+            do
+            {
+                var ix = prefix.LastIndexOfAny(sep, prefix.Length - 2);
+                if (ix <= 0)
+                {
+                    prefix = "";
+                    break;
+                }
+
+                prefix = prefix.Substring(0, ix + 1);
+            } while (!name.StartsWith(prefix, StringComparison.Ordinal));
+
+            return prefix;
+        }
     }
 }

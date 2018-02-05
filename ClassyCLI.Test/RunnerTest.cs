@@ -253,5 +253,69 @@ namespace ClassyCLI.Test
                 throw;
             }
         }
+
+        [Fact]
+        public void PrefixTest()
+        {
+            Run();
+            Run("foo");
+            Run("foo", "foo");
+            Run("foo", "bar");
+            Run("foo", "foo", "foo");
+            Run("foo", "foo", "bar");
+            Run("foo.bar");
+            Run("foo.bar", "foo.baz");
+            Run("foo.bar.who", "foo.bar.why");
+            Run("foo.bar.who", "foo.bop.why");
+            Run("foo.bar.who", "foo.bar.zoo", "foo.bar.why");
+            Run("foo.bar.who", "foo.bar.zoo", "foo.bop.why");
+
+            Run("foo.bar", "foo");
+            Run("zoo.foo.bar", "zoo.foo");
+
+            Run("1.2.3.4", "1.2.3.4");
+            Run("1.2.3.4", "1.2.3.5");
+            Run("1.2.3.4", "1.2.0.4");
+            Run("1.2.3.4", "1.0.3.4");
+            Run("1.2.3.4", "0.2.3.4");
+
+            Run("1.2.3.4", "1.2.3.4", "1.2.3.4");
+            Run("1.2.3.4", "1.2.3.4", "1.2.3.5");
+            Run("1.2.3.4", "1.2.4.4", "1.3.3.4");
+
+            Approvals.Approve(_sb);
+
+            void Run(params string[] names)
+            {
+                var any = false;
+                foreach (var name in names)
+                {
+                    any = true;
+                    _sb.AppendLine($"- {name}");
+                }
+                if (!any)
+                {
+                    _sb.AppendLine("_no names_");
+                }
+                _sb.AppendLine();
+
+                var prefix = Runner.CommonPrefix(names);
+                if (prefix == null)
+                {
+                    _sb.AppendLine("_null_");
+                }
+                else if (prefix == "")
+                {
+                    _sb.AppendLine("_empty_");
+                }
+                else
+                {
+                    _sb.AppendLine($"`{prefix}`");
+                }
+
+                _sb.AppendLine();
+                _sb.AppendLine();
+            }
+        }
     }
 }

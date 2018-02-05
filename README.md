@@ -180,6 +180,7 @@ Soon:
 	- "regular" double and single quoted strings already work
 - numeric enum story
 - better flag enum support
+- instance creation hooks / IoC support
 - (de)serialization support -- possibly in sibling package(s)
 
 
