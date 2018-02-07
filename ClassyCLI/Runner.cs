@@ -135,9 +135,6 @@ namespace ClassyCLI
 
         public static void Run(string[] arguments, IEnumerable<Type> types)
         {
-            // red, green, refactor
-            // this is going to be stupid simple for a while
-
             // TODO make param
             SetComparison(ignoreCase: true);
 
@@ -392,23 +389,44 @@ namespace ClassyCLI
             // doing anything intelligent based on what comes later sounds _very_ challenging
             arg.Trim(position);
 
-            var classes = GetClasses(types, arg.Value).ToList();
-            if (classes.Count != 1 || arg.Next == null)
+            var candidates = Candidate.FromTypes(types);
+            Candidate candidate;
+            string methodName;
+            if (!string.IsNullOrWhiteSpace(arg.Value))
             {
-                return classes.Select(GetClassName);
+                if (TryGetType(candidates, arg.Value, out int index))
+                {
+                    candidate = candidates[index];
+                    var len = candidate.Name.Length + 1;
+                    methodName = len >= arg.Value.Length ? null : arg.Value.Substring(len);
+                }
+                else
+                {
+                    throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
 
-            var cls = classes.Single();
+            // var classes = GetClasses(types, arg.Value).ToList();
+            // if (classes.Count != 1 || arg.Next == null)
+            // {
+            //     return classes.Select(GetClassName);
+            // }
+
+            // var cls = classes.Single();
 
             // method name
-            arg = arg.Next;
-            IEnumerable<MethodInfo> methods = GetMethods(cls);
+            // arg = arg.Next;
+            IEnumerable<MethodInfo> methods = GetMethods(candidate.Type);
 
-            methods = Matching(methods, arg?.Value, m => m.Name);
+            methods = Matching(methods, methodName, m => m.Name);
 
             if (arg?.Next == null)
             {
-                return methods.Select(m => m.Name);
+                return methods.Select(m => candidate.Name + "." + m.Name);
             }
 
             if (!TryGetSingle(methods, out var method))
@@ -461,6 +479,29 @@ namespace ClassyCLI
             }
 
             return GetParameterValueCompletions(arg, parameters, lastNamedParameter);
+        }
+
+        private static bool TryGetType(Candidate[] candidates, string value, out int index)
+        {
+            var match = -1;
+            for(int i = 0; i < candidates.Length; i++)
+            {
+                if (value.StartsWith(candidates[i].Name, _comparison))
+                {
+                    if (match == -1)
+                    {
+                        match = i;
+                    }
+                    else
+                    {
+                        index = match;
+                        return false;
+                    }
+                }
+            }
+
+            index = match;
+            return match != -1;
         }
 
         private static IEnumerable<MethodInfo> GetMethods(Type cls)

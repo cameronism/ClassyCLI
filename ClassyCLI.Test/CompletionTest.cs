@@ -43,10 +43,25 @@ namespace ClassyCLI.Test
             // System.DateTimeKind is another "simple" enum
         }
 
+        private class C20 : C2 { }
+
         [Fact]
         public void Test1()
         {
             var types = new[] { typeof(C1), typeof(C2) };
+
+            Complete(types, "c2.");
+            Complete(types, "c2");
+
+            types = new[] { typeof(C1), typeof(C2), typeof(C20) };
+            Complete(types, "c2.");
+            Complete(types, "c2");
+
+
+            types = new[] { typeof(C1), typeof(C2) };
+
+            if (types == null)
+            {
 
             Complete(types, "C1 ");
             Complete(types, "C1 m");
@@ -122,6 +137,7 @@ namespace ClassyCLI.Test
 
             Complete(types, "C3 M6 -d ");
             Complete(types, "C3 M6 -d Sunday -d ");
+            }
 
             Approvals.Approve(_sb);
         }
