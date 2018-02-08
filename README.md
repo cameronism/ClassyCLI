@@ -1,5 +1,7 @@
 # ClassyCLI
 
+**WORK IN PROGRESS -- DON'T TRY THIS YET**
+
 `ClassyCLI.Run()` provides an excellent command line interface to your existing methods and 
 requires no extra boilerplate or configuration.  `ClassyCLI` also supports command line completion
 for PowerShell, bash and zsh.
@@ -167,6 +169,7 @@ Before Publish:
 	- the right types
 	- --help
 	- --complete
+	- return the invoked method result so calling code can display it if desired
 - cleanup README
 
 
@@ -180,6 +183,7 @@ Soon:
 	- "regular" double and single quoted strings already work
 - numeric enum story
 - better flag enum support
+- CancellationToken parameter support -- automatically wired up to `ctrl-c`
 - instance creation hooks / IoC support
 - (de)serialization support -- possibly in sibling package(s)
 
