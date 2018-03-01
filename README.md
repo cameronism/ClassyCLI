@@ -165,6 +165,10 @@ Before Publish:
 - print usage for insufficient args
 - coherent class / namespace usage story
 - coherent method name omission story
+- ignore
+	- abstract methods
+	- non class / struct types
+	- generic types / generic methods -- possibly use string or sniff types someday
 - minimal `ClassyCLI.Run()`
 	- the right types
 	- --help

@@ -400,9 +400,16 @@ namespace ClassyCLI
                     var len = candidate.Name.Length + 1;
                     methodName = len >= arg.Value.Length ? null : arg.Value.Substring(len);
                 }
+                else if (index >= 0)
+                {
+                    return candidates
+                        .Skip(index)
+                        .Where(c => c.Name.StartsWith(arg.Value, _comparison))
+                        .Select(c => c.Name + '.');
+                }
                 else
                 {
-                    throw new NotImplementedException();
+                    return Enumerable.Empty<string>();
                 }
             }
             else
@@ -486,7 +493,8 @@ namespace ClassyCLI
             var match = -1;
             for(int i = 0; i < candidates.Length; i++)
             {
-                if (value.StartsWith(candidates[i].Name, _comparison))
+                var name = candidates[i].Name;
+                if (value.StartsWith(name, _comparison) || name.StartsWith(value, _comparison))
                 {
                     if (match == -1)
                     {
@@ -755,14 +763,14 @@ namespace ClassyCLI
 
         internal static string CommonPrefix(IEnumerable<string> names)
         {
-            var sep = new[] { '.', '+', '`' };
+            // var sep = new[] { '.', '+', '`' };
             string prefix = null;
             using (var e = names.GetEnumerator())
             {
                 if (!e.MoveNext()) return null;
                 prefix = e.Current;
 
-                var ix = prefix.LastIndexOfAny(sep, prefix.Length - 2);
+                var ix = prefix.LastIndexOf('.', prefix.Length - 2);
                 prefix = ix > 0 ? prefix.Substring(0, ix + 1) : "";
 
                 while (e.MoveNext() && prefix.Length > 0)
@@ -770,7 +778,7 @@ namespace ClassyCLI
                     var name = e.Current;
                     if (!name.StartsWith(prefix, StringComparison.Ordinal))
                     {
-                        prefix = CommonPrefix(prefix, name, sep);
+                        prefix = CommonPrefix(prefix, name);
                     }
                 }
             }
@@ -778,11 +786,11 @@ namespace ClassyCLI
             return prefix;
         }
 
-        internal static string CommonPrefix(string prefix, string name, char[] sep)
+        internal static string CommonPrefix(string prefix, string name)
         {
             do
             {
-                var ix = prefix.LastIndexOfAny(sep, prefix.Length - 2);
+                var ix = prefix.LastIndexOf('.', prefix.Length - 2);
                 if (ix <= 0)
                 {
                     prefix = "";

@@ -26,7 +26,7 @@ namespace ClassyCLI
             var i = 0;
             foreach (var type in types)
             {
-                result[i++] = new Candidate { Type = type, Name = type.FullName };
+                result[i++] = new Candidate { Type = type, Name = type.FullName.Replace('+', '.') };
             }
 
             var prefix = Runner.CommonPrefix(result.Select(item => item.Type.FullName));

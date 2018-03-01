@@ -45,6 +45,15 @@ namespace ClassyCLI.Test
 
         private class C20 : C2 { }
 
+        private class C4
+        {
+            public void M1(int foo = 0, int bar = 0) { }
+            public class C5
+            {
+                public void M1(int foo = 0, int bar = 0) { }
+            }
+        }
+
         [Fact]
         public void Test1()
         {
@@ -57,6 +66,8 @@ namespace ClassyCLI.Test
             Complete(types, "c2.");
             Complete(types, "c2");
 
+            types = new[] { typeof(C4), typeof(C4.C5) };
+            Complete(types, "c4.");
 
             types = new[] { typeof(C1), typeof(C2) };
 
