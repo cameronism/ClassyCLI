@@ -360,11 +360,17 @@ namespace ClassyCLI
                 {
                     return converter.ConvertFromString(s);
                 }
-                else
+
+                var ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(string) }, null);
+
+                if (ctor != null)
                 {
-                    // FIXME this is the part where we'll want to be more helpful 
-                    throw new Exception("this will never work");
+                    // nicer error here too
+                    return ctor.Invoke(new[] { s });
                 }
+
+                // FIXME this is the part where we'll want to be more helpful 
+                throw new Exception("this will never work");
             }
 
             // only non-strings should be left - which should be from DefaultAttribute
@@ -390,60 +396,18 @@ namespace ClassyCLI
             arg.Trim(position);
 
             var candidates = Candidate.FromTypes(types);
-            Candidate candidate;
-            string methodName;
+            MethodInfo method = null;
             if (!string.IsNullOrWhiteSpace(arg.Value))
             {
-                var value = arg.Value;
-                return candidates
-                    .Where(c => c.Name.StartsWith(value, _comparison) || value.StartsWith(c.Name, _comparison))
-                    .Select(c =>
-                    {
-                        return c.Name + '.';
-                    });
-                // if (TryGetType(candidates, arg.Value, out int index))
-                // {
-                //     candidate = candidates[index];
-                //     var len = candidate.Name.Length + 1;
-                //     methodName = len >= arg.Value.Length ? null : arg.Value.Substring(len);
-                // }
-                // else if (index >= 0)
-                // {
-                //     return candidates
-                //         .Skip(index)
-                //         .Where(c => c.Name.StartsWith(arg.Value, _comparison))
-                //         .Select(c => c.Name + '.');
-                // }
-                // else
-                // {
-                //     return Enumerable.Empty<string>();
-                // }
-            }
-            else
-            {
-                throw new NotImplementedException();
+                List<string> completions;
+                (completions, method) = GetInitialMatches(arg.Value, candidates);
+                if (arg.Next == null)
+                {
+                    return completions;
+                }
             }
 
-            // var classes = GetClasses(types, arg.Value).ToList();
-            // if (classes.Count != 1 || arg.Next == null)
-            // {
-            //     return classes.Select(GetClassName);
-            // }
-
-            // var cls = classes.Single();
-
-            // method name
-            // arg = arg.Next;
-            IEnumerable<MethodInfo> methods = GetMethods(candidate.Type);
-
-            methods = Matching(methods, methodName, m => m.Name);
-
-            if (arg?.Next == null)
-            {
-                return methods.Select(m => candidate.Name + "." + m.Name);
-            }
-
-            if (!TryGetSingle(methods, out var method))
+            if (method == null)
             {
                 return Enumerable.Empty<string>();
             }
@@ -493,6 +457,80 @@ namespace ClassyCLI
             }
 
             return GetParameterValueCompletions(arg, parameters, lastNamedParameter);
+        }
+
+        private static (List<string> completions, MethodInfo match) GetInitialMatches(string value, Candidate[] candidates)
+        {
+            MethodInfo method = null;
+            var completions = new List<string>();
+            int lastMatch = -1;
+
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                var candidate = candidates[i];
+                var name = candidate.Name;
+                var typeShorter = name.Length < value.Length;
+                string shorter, longer;
+                if (typeShorter)
+                {
+                    shorter = name;
+                    longer = value;
+                }
+                else
+                {
+                    longer = name;
+                    shorter = value;
+                }
+
+                if (!longer.StartsWith(shorter, _comparison)) continue;
+
+
+                lastMatch = i;
+                name = name + '.';
+                if (!typeShorter)
+                {
+                    completions.Add(name);
+                    continue;
+                }
+
+                method = AddMethodMatches(value, name, ref candidates[i], completions);
+            }
+
+            // if we only completed one type then go into its methods instead
+            if (completions.Count == 1)
+            {
+                var completion = completions[0];
+                if (candidates[lastMatch].Name.Length + 1 == completion.Length)
+                {
+                    completions.Clear();
+                    method = AddMethodMatches(value, completion, ref candidates[lastMatch], completions);
+                }
+            }
+
+            return (completions, method);
+        }
+
+        private static MethodInfo AddMethodMatches(string value, string name, ref Candidate candidate, List<string> completions)
+        {
+            var methods = candidate.Methods;
+            if (methods == null)
+            {
+                candidate.Methods = methods = GetMethods(candidate.Type).ToArray();
+            }
+
+            MethodInfo method = null;
+            foreach (var m in methods)
+            {
+                var completion = name + m.Name;
+
+                if (completion.StartsWith(value, _comparison))
+                {
+                    method = m;
+                    completions.Add(name + m.Name);
+                }
+            }
+
+            return method;
         }
 
         private static bool TryGetType(Candidate[] candidates, string value, out int index)

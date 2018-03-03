@@ -487,6 +487,18 @@ null
 }
 
 
+# Running E1 OP foo
+
+# Invoked E1 OP
+
+## ct System.Text.RegularExpressions.Regex
+
+{
+  "Pattern": "foo",
+  "Options": "None"
+}
+
+
 # Running E1 ON
 
 # Invoked E1 ON

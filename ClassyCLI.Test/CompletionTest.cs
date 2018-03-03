@@ -69,86 +69,85 @@ namespace ClassyCLI.Test
             types = new[] { typeof(C4), typeof(C4.C5) };
             Complete(types, "c4.");
 
+            types = new[] { typeof(C1), typeof(C2), typeof(C20) };
+            Complete(types, "c2.m");
+            Complete(types, "c2.m1");
+
             types = new[] { typeof(C1), typeof(C2) };
-
-            if (types == null)
-            {
-
-            Complete(types, "C1 ");
-            Complete(types, "C1 m");
-            Complete(types, "C1 M");
-            Complete(types, "C1 m1");
-            Complete(types, "C2 ");
-            Complete(types, "C2 m1");
-            Complete(types, "C2 x");
+            Complete(types, "C1.");
+            Complete(types, "C1.m");
+            Complete(types, "C1.M");
+            Complete(types, "C1.m1");
+            Complete(types, "C2.");
+            Complete(types, "C2.m1");
+            Complete(types, "C2.x");
 
             Complete(types, "C");
             Complete(types, "c1");
-            Complete(types, "c1 ");
+            Complete(types, "c1.");
 
             // should return no matches
             Complete(types, "xx");
-            Complete(types, "xx ");
-            Complete(types, "xx yy");
+            Complete(types, "xx.");
+            Complete(types, "xx.yy");
 
             types = new[] { typeof(C1), typeof(C2), typeof(C3) };
             // arguments
-            Complete(types, "C3 M1 -");
-            Complete(types, "C3 M1 -f");
-            Complete(types, "C3 M1 -foo");
-            Complete(types, "C3 M1 -FOO");
-            Complete(types, "C3 M1 -b");
-            Complete(types, "C3 M1 -bar");
-            Complete(types, "C3 M1 -BaR");
-            Complete(types, "C3 M1 -foo 1 -b");
-            Complete(types, "C3 M1 -foo 1 -");
-            Complete(types, "C3 M1 -bar 1 -");
-            Complete(types, "C3 M1 1");
-            Complete(types, "C3 M1 1 2");
-            Complete(types, "C3 M1 11");
-            Complete(types, "C3 M1 11 22");
-            Complete(types, "C3 M1 -- ");
-            Complete(types, "C3 M1 -- -");
-            Complete(types, "C3 M1 -- -f");
-            Complete(types, "C3 M1 1 -- ");
-            Complete(types, "C3 M1 1 -- -");
-            Complete(types, "C3 M1 1 -- -f");
-            Complete(types, "C3 M1 11 -- ");
-            Complete(types, "C3 M1 11 -- -");
-            Complete(types, "C3 M1 11 -- -f");
-            Complete(types, "C3 M1 -bar 1 -- ");
-            Complete(types, "C3 M1 -bar 1 -- -");
-            Complete(types, "C3 M1 -bar 1 -- -f");
-            Complete(types, "C3 M1 -bar 11 -- ");
-            Complete(types, "C3 M1 -bar 11 -- -");
-            Complete(types, "C3 M1 -bar 11 -- -f");
+            Complete(types, "C3.M1 -");
+            Complete(types, "C3.M1 -f");
+            Complete(types, "C3.M1 -foo");
+            Complete(types, "C3.M1 -FOO");
+            Complete(types, "C3.M1 -b");
+            Complete(types, "C3.M1 -bar");
+            Complete(types, "C3.M1 -BaR");
+            Complete(types, "C3.M1 -foo 1 -b");
+            Complete(types, "C3.M1 -foo 1 -");
+            Complete(types, "C3.M1 -bar 1 -");
+            Complete(types, "C3.M1 1");
+            Complete(types, "C3.M1 1 2");
+            Complete(types, "C3.M1 11");
+            Complete(types, "C3.M1 11 22");
+            Complete(types, "C3.M1 -- ");
+            Complete(types, "C3.M1 -- -");
+            Complete(types, "C3.M1 -- -f");
+            Complete(types, "C3.M1 1 -- ");
+            Complete(types, "C3.M1 1 -- -");
+            Complete(types, "C3.M1 1 -- -f");
+            Complete(types, "C3.M1 11 -- ");
+            Complete(types, "C3.M1 11 -- -");
+            Complete(types, "C3.M1 11 -- -f");
+            Complete(types, "C3.M1 -bar 1 -- ");
+            Complete(types, "C3.M1 -bar 1 -- -");
+            Complete(types, "C3.M1 -bar 1 -- -f");
+            Complete(types, "C3.M1 -bar 11 -- ");
+            Complete(types, "C3.M1 -bar 11 -- -");
+            Complete(types, "C3.M1 -bar 11 -- -f");
 
             // value completion
-            Complete(types, "C3 M2 -- ");
-            Complete(types, "C3 M2 S");
-            Complete(types, "C3 M2 s");
-            Complete(types, "C3 M3 -- ");
-            Complete(types, "C3 M3 S");
-            Complete(types, "C3 M3 s");
-            Complete(types, "C3 M3 -d ");
-            Complete(types, "C3 M3 -d S");
-            Complete(types, "C3 M3 -d s");
+            Complete(types, "C3.M2 -- ");
+            Complete(types, "C3.M2 S");
+            Complete(types, "C3.M2 s");
+            Complete(types, "C3.M3 -- ");
+            Complete(types, "C3.M3 S");
+            Complete(types, "C3.M3 s");
+            Complete(types, "C3.M3 -d ");
+            Complete(types, "C3.M3 -d S");
+            Complete(types, "C3.M3 -d s");
 
-            Complete(types, "C3 M2 ");
-            Complete(types, "C3 M3 ");
+            Complete(types, "C3.M2 ");
+            Complete(types, "C3.M3 ");
 
-            Complete(types, "C3 M3 -d szz", -3);
-            Complete(types, "C3 M3 -d szz", -2);
-            Complete(types, "C3 M3 -d szz", -1);
+            Complete(types, "C3.M3 -d szz", -3);
+            Complete(types, "C3.M3 -d szz", -2);
+            Complete(types, "C3.M3 -d szz", -1);
 
-            Complete(types, "C3 M4 -b t");
-            Complete(types, "C3 M4 -b ");
-            Complete(types, "C3 M5 -b n");
-            Complete(types, "C3 M5 -b ");
+            Complete(types, "C3.M4 -b t");
+            Complete(types, "C3.M4 -b ");
+            Complete(types, "C3.M5 -b n");
+            Complete(types, "C3.M5 -b ");
 
-            Complete(types, "C3 M6 -d ");
-            Complete(types, "C3 M6 -d Sunday -d ");
-            }
+            Complete(types, "C3.M6 -d ");
+            Complete(types, "C3.M6 -d Sunday -d ");
 
             Approvals.Approve(_sb);
         }

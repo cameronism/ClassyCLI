@@ -78,6 +78,7 @@ namespace ClassyCLI.Test
             public void OK(bool b) => Log(this, new { b });
             public void OL(bool? b) => Log(this, new { b });
             public void OM(CustomType ct) => Log(this, new { ct });
+            public void OP(System.Text.RegularExpressions.Regex ct) => Log(this, new { ct });
             public Task ON() { Log(this, new { }); return _task; }
             public ValueTask<object> OO() { Log(this, new { }); return _valueTask; }
         }
@@ -193,6 +194,7 @@ namespace ClassyCLI.Test
             Run("E1 OL null", types);
 
             Run("E1 OM foo", types);
+            Run("E1 OP foo", types);
 
 
             // Task
