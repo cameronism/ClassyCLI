@@ -29,7 +29,7 @@ namespace ClassyCLI
                 result[i++] = new Candidate { Type = type, Name = type.FullName.Replace('+', '.') };
             }
 
-            var prefix = Runner.CommonPrefix(result.Select(item => item.Type.FullName));
+            var prefix = Runner.CommonPrefix(result.Select(item => item.Name));
             var len = prefix.Length;
             if (len > 0)
             {

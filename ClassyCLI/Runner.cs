@@ -394,23 +394,30 @@ namespace ClassyCLI
             string methodName;
             if (!string.IsNullOrWhiteSpace(arg.Value))
             {
-                if (TryGetType(candidates, arg.Value, out int index))
-                {
-                    candidate = candidates[index];
-                    var len = candidate.Name.Length + 1;
-                    methodName = len >= arg.Value.Length ? null : arg.Value.Substring(len);
-                }
-                else if (index >= 0)
-                {
-                    return candidates
-                        .Skip(index)
-                        .Where(c => c.Name.StartsWith(arg.Value, _comparison))
-                        .Select(c => c.Name + '.');
-                }
-                else
-                {
-                    return Enumerable.Empty<string>();
-                }
+                var value = arg.Value;
+                return candidates
+                    .Where(c => c.Name.StartsWith(value, _comparison) || value.StartsWith(c.Name, _comparison))
+                    .Select(c =>
+                    {
+                        return c.Name + '.';
+                    });
+                // if (TryGetType(candidates, arg.Value, out int index))
+                // {
+                //     candidate = candidates[index];
+                //     var len = candidate.Name.Length + 1;
+                //     methodName = len >= arg.Value.Length ? null : arg.Value.Substring(len);
+                // }
+                // else if (index >= 0)
+                // {
+                //     return candidates
+                //         .Skip(index)
+                //         .Where(c => c.Name.StartsWith(arg.Value, _comparison))
+                //         .Select(c => c.Name + '.');
+                // }
+                // else
+                // {
+                //     return Enumerable.Empty<string>();
+                // }
             }
             else
             {
@@ -763,7 +770,6 @@ namespace ClassyCLI
 
         internal static string CommonPrefix(IEnumerable<string> names)
         {
-            // var sep = new[] { '.', '+', '`' };
             string prefix = null;
             using (var e = names.GetEnumerator())
             {
