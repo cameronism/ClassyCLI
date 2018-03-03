@@ -1,3 +1,5 @@
+## Unambiguous types: C1 vs C2
+
 ```
 c2.
    ^
@@ -15,6 +17,8 @@ c2
 - C2.M1
 - C2.M2
 
+
+## Ambiguous type names: C2 vs C20
 
 ```
 c2.
@@ -34,6 +38,8 @@ c2
 - C20.
 
 
+## Nested class at same level as methods
+
 ```
 c4.
    ^
@@ -42,6 +48,8 @@ c4.
 - C4.M1
 - C4.C5.
 
+
+## Method completions
 
 ```
 c2.m
@@ -142,6 +150,8 @@ c1.
 - C1.M1
 
 
+## Should return no completions
+
 ```
 xx
   ^
@@ -165,6 +175,8 @@ xx.yy
 
 _no completions_
 
+
+## Parameter name completion
 
 ```
 C3.M1 -
@@ -223,6 +235,8 @@ C3.M1 -BaR
 - -bar
 
 
+## Track which parameters have already been used
+
 ```
 C3.M1 -foo 1 -b
                ^
@@ -246,6 +260,8 @@ C3.M1 -bar 1 -
 
 - -foo
 
+
+## Don't try to complete numbers
 
 ```
 C3.M1 1
@@ -278,6 +294,8 @@ C3.M1 11 22
 
 _no completions_
 
+
+## No parameter names after `--`
 
 ```
 C3.M1 -- 
@@ -399,6 +417,8 @@ C3.M1 -bar 11 -- -f
 _no completions_
 
 
+## Value completion
+
 ```
 C3.M2 -- 
          ^
@@ -511,6 +531,8 @@ C3.M3
 - -d
 
 
+## Mid word completion
+
 ```
 C3.M3 -d szz
          ^
@@ -541,6 +563,8 @@ C3.M3 -d szz
 
 _no completions_
 
+
+## Null handling
 
 ```
 C3.M4 -b t
@@ -576,6 +600,8 @@ C3.M5 -b
 - false
 - null
 
+
+## Params(-ish) parameters can be used multiple times
 
 ```
 C3.M6 -d 

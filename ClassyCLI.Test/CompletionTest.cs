@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -13,6 +14,7 @@ namespace ClassyCLI.Test
         public CompletionTest()
         {
             _sb = new StringBuilder();
+            TestExtensions.SetTextWriter(new StringWriter(_sb));
         }
 
         private class C1
@@ -57,18 +59,22 @@ namespace ClassyCLI.Test
         [Fact]
         public void Test1()
         {
+            "Unambiguous types: C1 vs C2".H2();
             var types = new[] { typeof(C1), typeof(C2) };
 
             Complete(types, "c2.");
             Complete(types, "c2");
 
+            "Ambiguous type names: C2 vs C20".H2();
             types = new[] { typeof(C1), typeof(C2), typeof(C20) };
             Complete(types, "c2.");
             Complete(types, "c2");
 
+            "Nested class at same level as methods".H2();
             types = new[] { typeof(C4), typeof(C4.C5) };
             Complete(types, "c4.");
 
+            "Method completions".H2();
             types = new[] { typeof(C1), typeof(C2), typeof(C20) };
             Complete(types, "c2.m");
             Complete(types, "c2.m1");
@@ -86,13 +92,13 @@ namespace ClassyCLI.Test
             Complete(types, "c1");
             Complete(types, "c1.");
 
-            // should return no matches
+            "Should return no completions".H2();
             Complete(types, "xx");
             Complete(types, "xx.");
             Complete(types, "xx.yy");
 
+            "Parameter name completion".H2();
             types = new[] { typeof(C1), typeof(C2), typeof(C3) };
-            // arguments
             Complete(types, "C3.M1 -");
             Complete(types, "C3.M1 -f");
             Complete(types, "C3.M1 -foo");
@@ -100,13 +106,19 @@ namespace ClassyCLI.Test
             Complete(types, "C3.M1 -b");
             Complete(types, "C3.M1 -bar");
             Complete(types, "C3.M1 -BaR");
+
+            "Track which parameters have already been used".H2();
             Complete(types, "C3.M1 -foo 1 -b");
             Complete(types, "C3.M1 -foo 1 -");
             Complete(types, "C3.M1 -bar 1 -");
+
+            "Don't try to complete numbers".H2();
             Complete(types, "C3.M1 1");
             Complete(types, "C3.M1 1 2");
             Complete(types, "C3.M1 11");
             Complete(types, "C3.M1 11 22");
+
+            "No parameter names after `--`".H2();
             Complete(types, "C3.M1 -- ");
             Complete(types, "C3.M1 -- -");
             Complete(types, "C3.M1 -- -f");
@@ -123,7 +135,7 @@ namespace ClassyCLI.Test
             Complete(types, "C3.M1 -bar 11 -- -");
             Complete(types, "C3.M1 -bar 11 -- -f");
 
-            // value completion
+            "Value completion".H2();
             Complete(types, "C3.M2 -- ");
             Complete(types, "C3.M2 S");
             Complete(types, "C3.M2 s");
@@ -137,15 +149,18 @@ namespace ClassyCLI.Test
             Complete(types, "C3.M2 ");
             Complete(types, "C3.M3 ");
 
+            "Mid word completion".H2();
             Complete(types, "C3.M3 -d szz", -3);
             Complete(types, "C3.M3 -d szz", -2);
             Complete(types, "C3.M3 -d szz", -1);
 
+            "Null handling".H2();
             Complete(types, "C3.M4 -b t");
             Complete(types, "C3.M4 -b ");
             Complete(types, "C3.M5 -b n");
             Complete(types, "C3.M5 -b ");
 
+            "Params(-ish) parameters can be used multiple times".H2();
             Complete(types, "C3.M6 -d ");
             Complete(types, "C3.M6 -d Sunday -d ");
 
