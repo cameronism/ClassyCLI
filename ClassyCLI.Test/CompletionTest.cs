@@ -172,7 +172,7 @@ namespace ClassyCLI.Test
             var any = false;
             foreach (var completion in completions)
             {
-                _sb.AppendLine(completion);
+                _sb.AppendLine("- " + completion);
                 any = true;
             }
 
