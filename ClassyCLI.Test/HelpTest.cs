@@ -47,6 +47,9 @@ namespace ClassyCLI.Test
 
         public class Baz
         {
+            // /// <param name="s">more stuff</param>
+            // public static void DoRun(string s) { }
+
             /// <param name="s">more stuff</param>
             public static void Run(string s) { }
         }
@@ -71,14 +74,15 @@ namespace ClassyCLI.Test
 
         private void Run(IEnumerable<Type> types, string line)
         {
-            _tw.WriteLine("```");
-            _tw.WriteLine(line);
-            _tw.WriteLine("```");
+            _tw.WriteLine($"`{line}`");
             _tw.WriteLine();
 
             var arg = Argument.Parse(line);
             arg = arg.Remove("--help");
+
+            _tw.WriteLine("```");
             Runner.Help(types, arg, _tw);
+            _tw.WriteLine("```");
 
             _tw.WriteLine();
             _tw.WriteLine();

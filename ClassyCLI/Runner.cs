@@ -696,13 +696,15 @@ namespace ClassyCLI
         internal static void Help(IEnumerable<Type> types, Argument arg, TextWriter tw)
         {
             string name, description;
+            var candidates = Candidate.FromTypes(types);
 
+            // FIXME need to show type.method names for consistency with how they'll be invoked
             if (arg == null)
             {
                 tw.WriteLine("commands:");
-                foreach (var type in types)
+                foreach (var candidate in candidates)
                 {
-                    DescribeClass(type, out name, out description);
+                    DescribeClass(candidate, out name, out description);
                     tw.WriteLine("  {0,-17}{1}", name, description);
                 }
                 return;
@@ -710,12 +712,14 @@ namespace ClassyCLI
 
             SetComparison(ignoreCase: true);
 
-            var cls = Matching(types, arg.Value, t => t.Name).Single();
+            var cls = Matching(candidates, arg.Value, t => t.Name).Single();
             DescribeClass(cls, out name, out description);
             tw.WriteLine("{0,-19}{1}", name, description);
             tw.WriteLine();
 
-            var method = GetMethods(cls).Single();
+            // FIXME need to show all methods (and nested classes) if only class specified
+            // show only one method if method fully specified
+            var method = GetMethods(cls.Type).Single();
             var xml = XmlDocumentation.GetDocumentation(method);
 
             tw.WriteLine("arguments:");
@@ -770,10 +774,11 @@ namespace ClassyCLI
             return type.FullName;
         }
 
-        private static void DescribeClass(Type type, out string name, out string description)
+        private static void DescribeClass(Candidate candidate, out string name, out string description)
         {
+            var type = candidate.Type;
             var attr = type.GetCustomAttribute<DescriptionAttribute>();
-            name = GetClassName(type).ToLowerInvariant();
+            name = candidate.Name.ToLowerInvariant();
 
             if (attr != null)
             {

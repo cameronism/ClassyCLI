@@ -154,9 +154,11 @@ namespace ClassyCLI.Test
             Complete(types, "C3.M3 -d szz", -2);
             Complete(types, "C3.M3 -d szz", -1);
 
-            "Null handling".H2();
+            "Bool completion".H2();
             Complete(types, "C3.M4 -b t");
             Complete(types, "C3.M4 -b ");
+
+            "Null completion".H2();
             Complete(types, "C3.M5 -b n");
             Complete(types, "C3.M5 -b ");
 

@@ -1,62 +1,62 @@
-```
---help
-```
+`--help`
 
+```
 commands:
   foo              This is the foo
   bar              The bar stuff
-
-
-```
-foo --help
 ```
 
+
+`foo --help`
+
+```
 foo                This is the foo
 
 arguments:
   -number          Int32
   -day             Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday
-
-
-```
-bar --help
 ```
 
+
+`bar --help`
+
+```
 bar                The bar stuff
 
 arguments:
   -number          Really a number
   -timestamp       A date for something
-
-
-```
---help
 ```
 
+
+`--help`
+
+```
 commands:
   foo              This is the foo
   bar              The bar stuff
   bop              mmmmmmmm
-
-
-```
-bop --help
 ```
 
+
+`bop --help`
+
+```
 bop                mmmmmmmm
 
 arguments:
   -number          another number
   -timestamp       more stuff
-
-
-```
-baz --help
 ```
 
+
+`baz --help`
+
+```
 baz                
 
 arguments:
   -s               more stuff
+```
 
 

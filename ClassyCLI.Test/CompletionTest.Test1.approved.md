@@ -564,7 +564,7 @@ C3.M3 -d szz
 _no completions_
 
 
-## Null handling
+## Bool completion
 
 ```
 C3.M4 -b t
@@ -582,6 +582,8 @@ C3.M4 -b
 - true
 - false
 
+
+## Null completion
 
 ```
 C3.M5 -b n
