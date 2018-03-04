@@ -21,7 +21,7 @@ namespace ClassyCLI.Test
 
         private static void Log<T>(T instance, object arguments, [CallerMemberName] string member = "")
         {
-            _sb.AppendLine($"# Invoked {instance.GetType().Name} {member}");
+            _sb.AppendLine($"`{instance.GetType().Name}.{member}`");
             _sb.AppendLine();
 
             var argsType = arguments.GetType();
@@ -33,15 +33,16 @@ namespace ClassyCLI.Test
 
             foreach (var param in args)
             {
-                _sb.AppendLine($"## {param.Name} {param.ParameterType.GetTypeName()}");
-                _sb.AppendLine();
+                $"{param.Name} {param.ParameterType.GetTypeName()}".H3();
 
                 var value = argsType.GetProperty(param.Name).GetValue(arguments);
 
                 // skip types that can't / shouldn't be serialized
                 if (!(value is Stream || value is TextReader || value is FileInfo || value is DirectoryInfo || value is TextWriter))
                 {
+                    _sb.AppendLine("```");
                     _sb.AppendLine(JsonConvert.SerializeObject(value, Formatting.Indented, _converters));
+                    _sb.AppendLine("```");
                 }
 
                 _sb.AppendLine();
@@ -52,6 +53,7 @@ namespace ClassyCLI.Test
         public RunnerTest()
         {
             _sb = new StringBuilder();
+            TestExtensions.SetTextWriter(new StringWriter(_sb));
         }
 
         private class E1
@@ -111,13 +113,11 @@ namespace ClassyCLI.Test
         {
             var types = new[] { typeof(E1) };
 
-            _sb.AppendLine("strings are easy");
-            _sb.AppendLine();
+            "strings are easy".H1();
 
             Run("E1 O1 42", types);
 
-            _sb.AppendLine("other types");
-            _sb.AppendLine();
+            "other types".H1();
 
             Run("E1 O2 42", types);
 
@@ -155,22 +155,22 @@ namespace ClassyCLI.Test
             Run("E1 OC .", types);
             Run("E1 OD -", types);
 
-            _sb.AppendLine("Do not allow TextWriter to open existing file (by default)");
+            "Do not allow TextWriter to open existing file (by default)".H1();
             Run(new[] { "E1", "OD", tmp }, types, typeof(IOException));
 
-            // let the named arguments begin
+            "let the named arguments begin".H1();
             Run("E1 O1 -s hello", types);
             Run("E1 O7 -d 2017-10-28 Thursday", types);
             Run("E1 O7 -d 2017-10-28 -w Thursday", types);
             Run("E1 O7 -w Thursday -d 2017-10-28", types);
             Run("E1 O7 -w Thursday 2017-10-28", types);
 
-            // let me put param-ish weird characters in my string
+            "let me put param-ish weird characters in my string".H1();
             Run("E1 OE -- -a -b", types);
             Run("E1 OE -b bbbbb -- -a", types);
             Run("E1 OE -a aaaaa -- -b", types);
 
-            // params methods should be easy to invoke
+            "params methods should be easy to invoke".H1();
             Run("E1 OF a b c", types);
             Run("E1 OG a b c d", types);
             Run("E1 OH 1 2", types);
@@ -183,7 +183,7 @@ namespace ClassyCLI.Test
             Run("E1 OJ 1", types);
 
 
-            // multiple candidate classes
+            "multiple candidate classes".H1();
             types = new[] { typeof(E1), typeof(E2) };
             Run("E2 OJ 1", types);
             Run("E2 TwoVoid", types);
@@ -197,7 +197,7 @@ namespace ClassyCLI.Test
             Run("E1 OP foo", types);
 
 
-            // Task
+            "tasks".H1();
             var tcs = new TaskCompletionSource<object>();
             ThreadPool.QueueUserWorkItem(delegate { Thread.Sleep(1); tcs.SetResult(null); });
             _task = tcs.Task;
@@ -227,8 +227,7 @@ namespace ClassyCLI.Test
 
         private void Run(string[] args, IEnumerable<Type> classes, Type expectException = null)
         {
-            _sb.AppendLine($"# Running {string.Join(" ", args)}");
-            _sb.AppendLine();
+            $"Running {string.Join(" ", args)}".H2();
 
             if (expectException == null)
             {
@@ -246,8 +245,7 @@ namespace ClassyCLI.Test
                 if (expectException != null && expectException.IsAssignableFrom(e.GetType()))
                 {
 
-                    _sb.AppendLine($"# Exception {expectException.GetTypeName()}");
-                    _sb.AppendLine();
+                    $"Exception {expectException.GetTypeName()}".H2();
                     _sb.AppendLine();
                     return;
                 }

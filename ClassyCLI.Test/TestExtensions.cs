@@ -24,4 +24,11 @@ public static class TestExtensions
         return heading;
     }
 
+    public static string H3(this string heading)
+    {
+        _tw.WriteLine($"### {heading}");
+        _tw.WriteLine();
+        return heading;
+    }
+
 }

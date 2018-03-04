@@ -194,7 +194,10 @@ Soon:
 
 Someday:
 
-- custom completion value provider
+-	custom completion value provider
+-	custom parameter value provider  
+	example use case: allow library user to supply a parameter from environment variable or config file
+
 
 
 ## License
