@@ -12,6 +12,31 @@ namespace ClassyCLI
         public int Offset { get; private set; }
         public Argument Next { get; private set; }
 
+        public static Argument Parse(string[] arguments)
+        {
+            if (arguments == null || arguments.Length == 0) return null;
+
+            var arg = new Argument
+            {
+                Value = arguments[0],
+                Offset = 0,
+            };
+            var last = arg;
+
+            for (int i = 1; i < arguments.Length; i++)
+            {
+                last.Next = new Argument
+                {
+                    Value = arguments[i],
+                    // pretend they were space separated
+                    Offset = last.Offset + last.Value.Length + 1,
+                };
+                last = last.Next;
+            }
+
+            return arg;
+        }
+
         /// <summary>
         /// (Attempt to) parse line into arguments the same way a shell would
         /// </summary>

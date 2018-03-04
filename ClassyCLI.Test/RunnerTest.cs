@@ -115,93 +115,93 @@ namespace ClassyCLI.Test
 
             "strings are easy".H1();
 
-            Run("E1 O1 42", types);
+            Run("E1.O1 42", types);
 
             "other types".H1();
 
-            Run("E1 O2 42", types);
+            Run("E1.O2 42", types);
 
-            Run("E1 O3 42", types);
+            Run("E1.O3 42", types);
 
-            Run("E1 O4 1", types);
+            Run("E1.O4 1", types);
 
-            Run("E1 O4 Sunday", types);
+            Run("E1.O4 Sunday", types);
 
-            Run("E1 O5 tuesday", types);
+            Run("E1.O5 tuesday", types);
 
-            Run(new[] { "E1", "O5", "" }, types);
+            Run(new[] { "E1.O5", "" }, types);
 
-            Run(new[] { "E1", "O3", "" }, types);
+            Run(new[] { "E1.O3", "" }, types);
 
-            Run("E1 O6", types);
+            Run("E1.O6", types);
 
-            Run("E1 O7 2017-10-28 Thursday", types);
+            Run("E1.O7 2017-10-28 Thursday", types);
 
-            Run("E1 O7 2017-10-28", types);
+            Run("E1.O7 2017-10-28", types);
 
-            Run("E1 O8 -", types);
-            Run("E1 O9 -", types);
-            Run("E1 O9", types);
-            Run("E1 OA -", types);
+            Run("E1.O8 -", types);
+            Run("E1.O9 -", types);
+            Run("E1.O9", types);
+            Run("E1.OA -", types);
 
             var tmp = "./test.tmp.txt";
             // create a little clutter :shrug:
             File.WriteAllText(tmp, "");
 
-            Run(new[] { "E1", "O8", tmp }, types);
-            Run(new[] { "E1", "O9", tmp }, types);
-            Run(new[] { "E1", "OA", tmp }, types);
-            Run(new[] { "E1", "OB", tmp }, types);
-            Run("E1 OC .", types);
-            Run("E1 OD -", types);
+            Run(new[] { "E1.O8", tmp }, types);
+            Run(new[] { "E1.O9", tmp }, types);
+            Run(new[] { "E1.OA", tmp }, types);
+            Run(new[] { "E1.OB", tmp }, types);
+            Run("E1.OC .", types);
+            Run("E1.OD -", types);
 
             "Do not allow TextWriter to open existing file (by default)".H1();
-            Run(new[] { "E1", "OD", tmp }, types, typeof(IOException));
+            Run(new[] { "E1.OD", tmp }, types, typeof(IOException));
 
             "let the named arguments begin".H1();
-            Run("E1 O1 -s hello", types);
-            Run("E1 O7 -d 2017-10-28 Thursday", types);
-            Run("E1 O7 -d 2017-10-28 -w Thursday", types);
-            Run("E1 O7 -w Thursday -d 2017-10-28", types);
-            Run("E1 O7 -w Thursday 2017-10-28", types);
+            Run("E1.O1 -s hello", types);
+            Run("E1.O7 -d 2017-10-28 Thursday", types);
+            Run("E1.O7 -d 2017-10-28 -w Thursday", types);
+            Run("E1.O7 -w Thursday -d 2017-10-28", types);
+            Run("E1.O7 -w Thursday 2017-10-28", types);
 
             "let me put param-ish weird characters in my string".H1();
-            Run("E1 OE -- -a -b", types);
-            Run("E1 OE -b bbbbb -- -a", types);
-            Run("E1 OE -a aaaaa -- -b", types);
+            Run("E1.OE -- -a -b", types);
+            Run("E1.OE -b bbbbb -- -a", types);
+            Run("E1.OE -a aaaaa -- -b", types);
 
             "params methods should be easy to invoke".H1();
-            Run("E1 OF a b c", types);
-            Run("E1 OG a b c d", types);
-            Run("E1 OH 1 2", types);
-            Run("E1 OI s 2018-01-01 2019-01-01", types);
-            Run("E1 OI -s s 2018-01-01 2019-01-01", types);
-            Run("E1 OI s -d 2018-01-01", types);
-            Run("E1 OI -s s -d 2018-01-01", types);
-            Run("E1 OI -d 2018-01-01 -s s -d 2019-01-01", types);
-            Run("E1 OJ", types);
-            Run("E1 OJ 1", types);
+            Run("E1.OF a b c", types);
+            Run("E1.OG a b c d", types);
+            Run("E1.OH 1 2", types);
+            Run("E1.OI s 2018-01-01 2019-01-01", types);
+            Run("E1.OI -s s 2018-01-01 2019-01-01", types);
+            Run("E1.OI s -d 2018-01-01", types);
+            Run("E1.OI -s s -d 2018-01-01", types);
+            Run("E1.OI -d 2018-01-01 -s s -d 2019-01-01", types);
+            Run("E1.OJ", types);
+            Run("E1.OJ 1", types);
 
 
             "multiple candidate classes".H1();
             types = new[] { typeof(E1), typeof(E2) };
-            Run("E2 OJ 1", types);
-            Run("E2 TwoVoid", types);
+            Run("E2.OJ 1", types);
+            Run("E2.TwoVoid", types);
 
 
-            Run("E1 OK true", types);
-            Run("E1 OL true", types);
-            Run("E1 OL null", types);
+            Run("E1.OK true", types);
+            Run("E1.OL true", types);
+            Run("E1.OL null", types);
 
-            Run("E1 OM foo", types);
-            Run("E1 OP foo", types);
+            Run("E1.OM foo", types);
+            Run("E1.OP foo", types);
 
 
             "tasks".H1();
             var tcs = new TaskCompletionSource<object>();
             ThreadPool.QueueUserWorkItem(delegate { Thread.Sleep(1); tcs.SetResult(null); });
             _task = tcs.Task;
-            Run("E1 ON", types);
+            Run("E1.ON", types);
             _sb.AppendLine(tcs.Task.Status.ToString());
             _sb.AppendLine();
             _sb.AppendLine();
@@ -212,12 +212,15 @@ namespace ClassyCLI.Test
             tcs = new TaskCompletionSource<object>();
             ThreadPool.QueueUserWorkItem(delegate { Thread.Sleep(1); tcs.SetResult(null); });
             _valueTask = new ValueTask<object>(tcs.Task);
-            Run("E1 OO", types);
+            Run("E1.OO", types);
             _sb.AppendLine(tcs.Task.Status.ToString());
             _sb.AppendLine();
             _sb.AppendLine();
             _valueTask = default(ValueTask<object>);
 
+
+            // FIXME need to test bad invocations
+            // there's a *lot* of ways to get this to blow up right now
 
 
             Approvals.Approve(_sb);

@@ -1,6 +1,6 @@
 ﻿# strings are easy
 
-## Running E1 O1 42
+## Running E1.O1 42
 
 `E1.O1`
 
@@ -13,7 +13,7 @@
 
 # other types
 
-## Running E1 O2 42
+## Running E1.O2 42
 
 `E1.O2`
 
@@ -24,7 +24,7 @@
 ```
 
 
-## Running E1 O3 42
+## Running E1.O3 42
 
 `E1.O3`
 
@@ -35,7 +35,7 @@
 ```
 
 
-## Running E1 O4 1
+## Running E1.O4 1
 
 `E1.O4`
 
@@ -46,7 +46,7 @@
 ```
 
 
-## Running E1 O4 Sunday
+## Running E1.O4 Sunday
 
 `E1.O4`
 
@@ -57,7 +57,7 @@
 ```
 
 
-## Running E1 O5 tuesday
+## Running E1.O5 tuesday
 
 `E1.O5`
 
@@ -68,7 +68,7 @@
 ```
 
 
-## Running E1 O5 
+## Running E1.O5 
 
 `E1.O5`
 
@@ -79,7 +79,7 @@ null
 ```
 
 
-## Running E1 O3 
+## Running E1.O3 
 
 `E1.O3`
 
@@ -90,7 +90,7 @@ null
 ```
 
 
-## Running E1 O6
+## Running E1.O6
 
 `E1.O6`
 
@@ -101,7 +101,7 @@ null
 ```
 
 
-## Running E1 O7 2017-10-28 Thursday
+## Running E1.O7 2017-10-28 Thursday
 
 `E1.O7`
 
@@ -118,7 +118,7 @@ null
 ```
 
 
-## Running E1 O7 2017-10-28
+## Running E1.O7 2017-10-28
 
 `E1.O7`
 
@@ -135,7 +135,7 @@ null
 ```
 
 
-## Running E1 O8 -
+## Running E1.O8 -
 
 `E1.O8`
 
@@ -143,7 +143,7 @@ null
 
 
 
-## Running E1 O9 -
+## Running E1.O9 -
 
 `E1.O9`
 
@@ -151,7 +151,7 @@ null
 
 
 
-## Running E1 O9
+## Running E1.O9
 
 `E1.O9`
 
@@ -162,7 +162,7 @@ null
 ```
 
 
-## Running E1 OA -
+## Running E1.OA -
 
 `E1.OA`
 
@@ -170,7 +170,7 @@ null
 
 
 
-## Running E1 O8 ./test.tmp.txt
+## Running E1.O8 ./test.tmp.txt
 
 `E1.O8`
 
@@ -178,7 +178,7 @@ null
 
 
 
-## Running E1 O9 ./test.tmp.txt
+## Running E1.O9 ./test.tmp.txt
 
 `E1.O9`
 
@@ -186,7 +186,7 @@ null
 
 
 
-## Running E1 OA ./test.tmp.txt
+## Running E1.OA ./test.tmp.txt
 
 `E1.OA`
 
@@ -194,7 +194,7 @@ null
 
 
 
-## Running E1 OB ./test.tmp.txt
+## Running E1.OB ./test.tmp.txt
 
 `E1.OB`
 
@@ -202,7 +202,7 @@ null
 
 
 
-## Running E1 OC .
+## Running E1.OC .
 
 `E1.OC`
 
@@ -210,7 +210,7 @@ null
 
 
 
-## Running E1 OD -
+## Running E1.OD -
 
 `E1.OD`
 
@@ -220,14 +220,14 @@ null
 
 # Do not allow TextWriter to open existing file (by default)
 
-## Running E1 OD ./test.tmp.txt
+## Running E1.OD ./test.tmp.txt
 
 ## Exception System.IO.IOException
 
 
 # let the named arguments begin
 
-## Running E1 O1 -s hello
+## Running E1.O1 -s hello
 
 `E1.O1`
 
@@ -238,7 +238,7 @@ null
 ```
 
 
-## Running E1 O7 -d 2017-10-28 Thursday
+## Running E1.O7 -d 2017-10-28 Thursday
 
 `E1.O7`
 
@@ -255,7 +255,7 @@ null
 ```
 
 
-## Running E1 O7 -d 2017-10-28 -w Thursday
+## Running E1.O7 -d 2017-10-28 -w Thursday
 
 `E1.O7`
 
@@ -272,7 +272,7 @@ null
 ```
 
 
-## Running E1 O7 -w Thursday -d 2017-10-28
+## Running E1.O7 -w Thursday -d 2017-10-28
 
 `E1.O7`
 
@@ -289,7 +289,7 @@ null
 ```
 
 
-## Running E1 O7 -w Thursday 2017-10-28
+## Running E1.O7 -w Thursday 2017-10-28
 
 `E1.O7`
 
@@ -308,7 +308,7 @@ null
 
 # let me put param-ish weird characters in my string
 
-## Running E1 OE -- -a -b
+## Running E1.OE -- -a -b
 
 `E1.OE`
 
@@ -325,7 +325,7 @@ null
 ```
 
 
-## Running E1 OE -b bbbbb -- -a
+## Running E1.OE -b bbbbb -- -a
 
 `E1.OE`
 
@@ -342,7 +342,7 @@ null
 ```
 
 
-## Running E1 OE -a aaaaa -- -b
+## Running E1.OE -a aaaaa -- -b
 
 `E1.OE`
 
@@ -361,7 +361,7 @@ null
 
 # params methods should be easy to invoke
 
-## Running E1 OF a b c
+## Running E1.OF a b c
 
 `E1.OF`
 
@@ -376,7 +376,7 @@ null
 ```
 
 
-## Running E1 OG a b c d
+## Running E1.OG a b c d
 
 `E1.OG`
 
@@ -392,7 +392,7 @@ null
 ```
 
 
-## Running E1 OH 1 2
+## Running E1.OH 1 2
 
 `E1.OH`
 
@@ -406,7 +406,7 @@ null
 ```
 
 
-## Running E1 OI s 2018-01-01 2019-01-01
+## Running E1.OI s 2018-01-01 2019-01-01
 
 `E1.OI`
 
@@ -426,7 +426,7 @@ null
 ```
 
 
-## Running E1 OI -s s 2018-01-01 2019-01-01
+## Running E1.OI -s s 2018-01-01 2019-01-01
 
 `E1.OI`
 
@@ -446,7 +446,7 @@ null
 ```
 
 
-## Running E1 OI s -d 2018-01-01
+## Running E1.OI s -d 2018-01-01
 
 `E1.OI`
 
@@ -465,7 +465,7 @@ null
 ```
 
 
-## Running E1 OI -s s -d 2018-01-01
+## Running E1.OI -s s -d 2018-01-01
 
 `E1.OI`
 
@@ -484,7 +484,7 @@ null
 ```
 
 
-## Running E1 OI -d 2018-01-01 -s s -d 2019-01-01
+## Running E1.OI -d 2018-01-01 -s s -d 2019-01-01
 
 `E1.OI`
 
@@ -504,7 +504,7 @@ null
 ```
 
 
-## Running E1 OJ
+## Running E1.OJ
 
 `E1.OJ`
 
@@ -515,7 +515,7 @@ null
 ```
 
 
-## Running E1 OJ 1
+## Running E1.OJ 1
 
 `E1.OJ`
 
@@ -530,7 +530,7 @@ null
 
 # multiple candidate classes
 
-## Running E2 OJ 1
+## Running E2.OJ 1
 
 `E2.OJ`
 
@@ -543,12 +543,12 @@ null
 ```
 
 
-## Running E2 TwoVoid
+## Running E2.TwoVoid
 
 `E2.TwoVoid`
 
 
-## Running E1 OK true
+## Running E1.OK true
 
 `E1.OK`
 
@@ -559,7 +559,7 @@ true
 ```
 
 
-## Running E1 OL true
+## Running E1.OL true
 
 `E1.OL`
 
@@ -570,7 +570,7 @@ true
 ```
 
 
-## Running E1 OL null
+## Running E1.OL null
 
 `E1.OL`
 
@@ -581,7 +581,7 @@ null
 ```
 
 
-## Running E1 OM foo
+## Running E1.OM foo
 
 `E1.OM`
 
@@ -594,7 +594,7 @@ null
 ```
 
 
-## Running E1 OP foo
+## Running E1.OP foo
 
 `E1.OP`
 
@@ -610,7 +610,7 @@ null
 
 # tasks
 
-## Running E1 ON
+## Running E1.ON
 
 `E1.ON`
 
@@ -618,7 +618,7 @@ null
 RanToCompletion
 
 
-## Running E1 OO
+## Running E1.OO
 
 `E1.OO`
 

@@ -138,34 +138,36 @@ namespace ClassyCLI
             // TODO make param
             SetComparison(ignoreCase: true);
 
-            var classArg = arguments[0];
-            var methodArg = arguments[1];
+            var candidates = Candidate.FromTypes(types);
+            var arg = Argument.Parse(arguments);
+            var (completions, method, candidateIndex) = GetInitialMatches(arg.Value, candidates);
 
-            var cls = GetClasses(types, classArg).Single();
+            // FIXME make sure we've got a method and only one match
+            // need to do something reasonable without method match
 
-            var method = cls.GetMethods()
-                .Where(m => m.Name.StartsWith(methodArg, _comparison))
-                .Single();
-
-            var instance = method.IsStatic ? null : Activator.CreateInstance(cls);
+            var instance = method.IsStatic ? null : Activator.CreateInstance(candidates[candidateIndex].Type);
             var (args, info) = Parameter.Create(method.GetParameters());
 
+            arg = arg.Next;
             Parameter destination = null;
             int positional = -1;
             var positionalOnly = false;
             var named = false;
 
-            foreach (var a in arguments.Skip(2))
+            while (arg != null)
             {
+                var value = arg.Value;
+                arg = arg.Next;
+
                 if (destination == null)
                 {
-                    if (!positionalOnly && TryGetNamedParam(a, info, out destination))
+                    if (!positionalOnly && TryGetNamedParam(value, info, out destination))
                     {
                         named = true;
                         continue;
                     }
 
-                    if (a == "--")
+                    if (value == "--")
                     {
                         positionalOnly = true;
                         continue;
@@ -178,7 +180,7 @@ namespace ClassyCLI
                     } while (destination.HasValue);
                 }
 
-                destination.SetValue(a);
+                destination.SetValue(value);
 
                 if (named || !(destination is EnumerableParameter))
                 {
@@ -400,7 +402,7 @@ namespace ClassyCLI
             if (!string.IsNullOrWhiteSpace(arg.Value))
             {
                 List<string> completions;
-                (completions, method) = GetInitialMatches(arg.Value, candidates);
+                (completions, method, _) = GetInitialMatches(arg.Value, candidates);
                 if (arg.Next == null)
                 {
                     return completions;
@@ -459,7 +461,7 @@ namespace ClassyCLI
             return GetParameterValueCompletions(arg, parameters, lastNamedParameter);
         }
 
-        private static (List<string> completions, MethodInfo match) GetInitialMatches(string value, Candidate[] candidates)
+        private static (List<string> completions, MethodInfo match, int candidateMatch) GetInitialMatches(string value, Candidate[] candidates)
         {
             MethodInfo method = null;
             var completions = new List<string>();
@@ -507,7 +509,7 @@ namespace ClassyCLI
                 }
             }
 
-            return (completions, method);
+            return (completions, method, lastMatch);
         }
 
         private static MethodInfo AddMethodMatches(string value, string name, ref Candidate candidate, List<string> completions)
