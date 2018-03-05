@@ -69,7 +69,6 @@ namespace ClassyCLI
 
                 return new Parameter();
             }
-
         }
 
         class EnumerableParameter : Parameter
@@ -133,19 +132,65 @@ namespace ClassyCLI
             _ignoreCase = ignoreCase;
         }
 
-        public static void Run(string[] arguments, IEnumerable<Type> types)
+        private static bool IsPublicIsh(Type t)
         {
-            // TODO make param
-            SetComparison(ignoreCase: true);
+            while (t.IsNested)
+            {
+                if (!t.IsNestedPublic)
+                {
+                    return false;
+                }
+
+                t = t.DeclaringType;
+            }
+
+            return t.IsPublic;
+        }
+
+        #region Run overloads
+        public static object Run() => Run(Assembly.GetEntryAssembly());
+        public static object Run(Assembly assembly) => Run(new[] { assembly });
+        public static object Run(IEnumerable<Assembly> assemblies) =>
+            Run(assemblies
+                .SelectMany(a => a.GetTypes())
+                .Where(IsPublicIsh));
+
+        public static object Run(IEnumerable<Type> types) => Run(Environment.GetCommandLineArgs(), types);
+        #endregion
+
+        public static object Run(IEnumerable<string> arguments, IEnumerable<Type> types)
+        {
+            // may want to intelligently (or based on configuration) 
+            // *not* skip the (assumed) assmebly name arg someday
+
+            // definitely want case sensitivity configurable someday
+
+            return Run(arguments.Skip(1), types, ignoreCase: true);
+        }
+
+        internal static object Run(IEnumerable<string> arguments, IEnumerable<Type> types, bool ignoreCase)
+        {
+            SetComparison(ignoreCase: ignoreCase);
 
             var candidates = Candidate.FromTypes(types);
             var arg = Argument.Parse(arguments);
-            var (completions, method, candidateIndex) = GetInitialMatches(arg.Value, candidates);
+            var suggestion = GetSuggestions(arg?.Value ?? string.Empty, candidates);
 
-            // FIXME make sure we've got a method and only one match
-            // need to do something reasonable without method match
+            if (suggestion == null || suggestion.Method == null || suggestion.Next != null)
+            {
+                // FIXME 
+                // need to do something reasonable without method match
+                Console.Error.WriteLine("FIXME");
+                foreach (var value in Suggestion.ToEnumerable(suggestion))
+                {
+                    Console.Error.WriteLine(value);
+                }
+                // need to set status code
+                return null;
+            }
 
-            var instance = method.IsStatic ? null : Activator.CreateInstance(candidates[candidateIndex].Type);
+            var method = suggestion.Method;
+            var instance = method.IsStatic ? null : Activator.CreateInstance(suggestion.Type);
             var (args, info) = Parameter.Create(method.GetParameters());
 
             arg = arg.Next;
@@ -210,11 +255,13 @@ namespace ClassyCLI
             var result = method.Invoke(instance, args);
             if (result != null)
             {
-                HandleReturnValue(result, method.ReturnType);
+                result = HandleReturnValue(result, method.ReturnType);
             }
+
+            return result;
         }
 
-        private static void HandleReturnValue(object result, Type returnType)
+        private static object HandleReturnValue(object result, Type returnType)
         {
             // slowly, painfully, as safely as (reasonably) possible, check for "awaitable" pattern then block on it
             // technically GetResult and ConfigureAwait are not required to be "awaitable" but ValueTask and Task support it so use that
@@ -231,6 +278,8 @@ namespace ClassyCLI
                 result = getResult.Invoke(awaiter, null);
                 returnType = getResult.ReturnType;
             }
+
+            return result;
         }
 
         // Try to get public parameterless instance method
@@ -238,12 +287,6 @@ namespace ClassyCLI
         {
             mi = type.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public, null, Type.EmptyTypes, null);
             return mi != null;
-        }
-
-        private static IEnumerable<Type> GetClasses(IEnumerable<Type> types, string classArg)
-        {
-            return types
-                .Where(m => m.Name.IndexOf(classArg, _comparison) != -1);
         }
 
         static char[] _prefix = new[] { '-', '/', '@', '=' };
@@ -390,7 +433,6 @@ namespace ClassyCLI
             // TODO make param
             SetComparison(ignoreCase: true);
 
-            // class name
             var arg = Argument.Parse(line);
 
             // ignore everything after `position`
@@ -398,17 +440,17 @@ namespace ClassyCLI
             arg.Trim(position);
 
             var candidates = Candidate.FromTypes(types);
-            MethodInfo method = null;
+            Suggestion suggestions = null;
             if (!string.IsNullOrWhiteSpace(arg.Value))
             {
-                List<string> completions;
-                (completions, method, _) = GetInitialMatches(arg.Value, candidates);
+                suggestions = GetSuggestions(arg.Value, candidates);
                 if (arg.Next == null)
                 {
-                    return completions;
+                    return Suggestion.ToEnumerable(suggestions);
                 }
             }
 
+            var method = suggestions?.Method;
             if (method == null)
             {
                 return Enumerable.Empty<string>();
@@ -461,10 +503,10 @@ namespace ClassyCLI
             return GetParameterValueCompletions(arg, parameters, lastNamedParameter);
         }
 
-        private static (List<string> completions, MethodInfo match, int candidateMatch) GetInitialMatches(string value, Candidate[] candidates)
+        private static Suggestion GetSuggestions(string value, Candidate[] candidates)
         {
-            MethodInfo method = null;
-            var completions = new List<string>();
+            Suggestion head = null;
+            Suggestion tail = null;
             int lastMatch = -1;
 
             for (int i = 0; i < candidates.Length; i++)
@@ -486,33 +528,31 @@ namespace ClassyCLI
 
                 if (!longer.StartsWith(shorter, _comparison)) continue;
 
-
                 lastMatch = i;
                 name = name + '.';
                 if (!typeShorter)
                 {
-                    completions.Add(name);
+                    Suggestion.Append(ref head, ref tail, name, candidate.Type);
                     continue;
                 }
 
-                method = AddMethodMatches(value, name, ref candidates[i], completions);
+                AddMethodMatches(value, name, ref candidates[i], ref head, ref tail);
             }
 
             // if we only completed one type then go into its methods instead
-            if (completions.Count == 1)
+            if (head != null && head.Next == null && head.Method == null)
             {
-                var completion = completions[0];
-                if (candidates[lastMatch].Name.Length + 1 == completion.Length)
-                {
-                    completions.Clear();
-                    method = AddMethodMatches(value, completion, ref candidates[lastMatch], completions);
-                }
+                var name = head.Value;
+                var type = head.Type;
+                head = tail = null;
+
+                AddMethodMatches(null, name, ref candidates[lastMatch], ref head, ref tail);
             }
 
-            return (completions, method, lastMatch);
+            return head;
         }
 
-        private static MethodInfo AddMethodMatches(string value, string name, ref Candidate candidate, List<string> completions)
+        private static void AddMethodMatches(string value, string name, ref Candidate candidate, ref Suggestion head, ref Suggestion tail)
         {
             var methods = candidate.Methods;
             if (methods == null)
@@ -520,54 +560,21 @@ namespace ClassyCLI
                 candidate.Methods = methods = GetMethods(candidate.Type).ToArray();
             }
 
-            MethodInfo method = null;
             foreach (var m in methods)
             {
                 var completion = name + m.Name;
 
-                if (completion.StartsWith(value, _comparison))
+                if (value == null || completion.StartsWith(value, _comparison))
                 {
-                    method = m;
-                    completions.Add(name + m.Name);
+                    Suggestion.Append(ref head, ref tail, name + m.Name, candidate.Type, m);
                 }
             }
-
-            return method;
-        }
-
-        private static bool TryGetType(Candidate[] candidates, string value, out int index)
-        {
-            var match = -1;
-            for(int i = 0; i < candidates.Length; i++)
-            {
-                var name = candidates[i].Name;
-                if (value.StartsWith(name, _comparison) || name.StartsWith(value, _comparison))
-                {
-                    if (match == -1)
-                    {
-                        match = i;
-                    }
-                    else
-                    {
-                        index = match;
-                        return false;
-                    }
-                }
-            }
-
-            index = match;
-            return match != -1;
         }
 
         private static IEnumerable<MethodInfo> GetMethods(Type cls)
         {
             return cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
                 .Where(m => OriginalDeclaringType(m) != typeof(object));
-        }
-
-        private static string GetClassName(Type t)
-        {
-            return t.Name;
         }
 
         private static Type OriginalDeclaringType(MethodInfo m)
@@ -651,22 +658,6 @@ namespace ClassyCLI
             }
 
             return completions.Where(c => selector(c).StartsWith(value, _comparison));
-        }
-
-
-        private static bool TryGetSingle<T>(IEnumerable<T> items, out T item)
-        {
-            using (var enumerator = items.GetEnumerator())
-            {
-                if (!enumerator.MoveNext())
-                {
-                    item = default(T);
-                    return false;
-                }
-
-                item = enumerator.Current;
-                return !enumerator.MoveNext();
-            }
         }
 
         private static bool PossibleParameterName(string s)

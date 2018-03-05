@@ -20,7 +20,12 @@ namespace ClassyCLI
             int count;
             if (types is ICollection<Type> cc) count = cc.Count;
             else if (types is IReadOnlyCollection<Type> rc) count = rc.Count;
-            else throw new NotImplementedException();
+            else
+            {
+                var list = types.ToList();
+                count = list.Count;
+                types = list;
+            }
 
             var result = new Candidate[count];
             var i = 0;

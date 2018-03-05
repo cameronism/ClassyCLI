@@ -12,29 +12,33 @@ namespace ClassyCLI
         public int Offset { get; private set; }
         public Argument Next { get; private set; }
 
-        public static Argument Parse(string[] arguments)
+        public static Argument Parse(IEnumerable<string> arguments)
         {
-            if (arguments == null || arguments.Length == 0) return null;
+            if (arguments == null) return null;
 
-            var arg = new Argument
-            {
-                Value = arguments[0],
-                Offset = 0,
-            };
-            var last = arg;
+            Argument first = null;
+            Argument last = null;
 
-            for (int i = 1; i < arguments.Length; i++)
+            foreach (var arg in arguments)
             {
-                last.Next = new Argument
+                var current = new Argument
                 {
-                    Value = arguments[i],
-                    // pretend they were space separated
-                    Offset = last.Offset + last.Value.Length + 1,
+                    Value = arg,
                 };
-                last = last.Next;
+
+                if (first == null)
+                {
+                    first = last = current;
+                }
+                else
+                {
+                    last.Next = current;
+                    current.Offset = last.Offset + last.Value.Length + 1;
+                    last = current;
+                }
             }
 
-            return arg;
+            return first;
         }
 
         /// <summary>

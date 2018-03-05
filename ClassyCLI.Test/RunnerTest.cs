@@ -235,13 +235,13 @@ namespace ClassyCLI.Test
             if (expectException == null)
             {
                 // no try/catch for easier debugging by default
-                Runner.Run(args, classes);
+                Runner.Run(args, classes, ignoreCase: true);
                 return;
             }
 
             try
             {
-                Runner.Run(args, classes);
+                Runner.Run(args, classes, ignoreCase: true);
             }
             catch (Exception e)
             {

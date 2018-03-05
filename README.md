@@ -14,32 +14,32 @@ using ClassyCLI;
 
 namespace Demo
 {
-	class Program
-	{
-		static void Main(string[] args)
-		{
-			ClassyCLI.Run();
-		}
-	}
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            ClassyCLI.Run();
+        }
+    }
 
-	public class Hello
-	{
-		public void World(string name = "world")
-		{
-			Console.WriteLine($"Hello {name}!");
-		}
-	}
+    public class Hello
+    {
+        public void World(string name = "world")
+        {
+            Console.WriteLine($"Hello {name}!");
+        }
+    }
 }
 ```
 
 Example usage:
 
 ```
-$ Demo hello world
+$ Demo hello.world
 Hello world!
-$ Demo hello world classy
+$ Demo hello.world classy
 Hello classy!
-$ Demo hello world -name Ron
+$ Demo hello.world -name Ron
 Hello Ron!
 ```
 
