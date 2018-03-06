@@ -100,6 +100,16 @@ namespace ClassyCLI
             return first;
         }
 
+        public Argument Remove(Argument previous, Argument match)
+        {
+            if (previous == null)
+            {
+                return match.Next;
+            }
+            previous.Next = match.Next;
+            return this;
+        }
+
         // unconditionally remove first occurence of value
         // this is probably not usable in the general `Run` case since presumably context will matter
         public Argument Remove(string value)
@@ -176,6 +186,7 @@ namespace ClassyCLI
             }
             else
             {
+                tail.Value = tail.Value.Substring(0, position - tail.Offset);
                 tail.Next = null;
             }
         }

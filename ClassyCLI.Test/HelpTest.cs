@@ -81,7 +81,8 @@ namespace ClassyCLI.Test
             arg = arg.Remove("--help");
 
             _tw.WriteLine("```");
-            Runner.Help(types, arg, _tw);
+            var invocation = new Invocation(null, null, ignoreCase: true);
+            invocation.InvokeHelp(arg, types, _tw);
             _tw.WriteLine("```");
 
             _tw.WriteLine();

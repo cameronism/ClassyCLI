@@ -1,62 +1,61 @@
 `--help`
 
 ```
-commands:
-  foo              This is the foo
-  bar              The bar stuff
+Foo.                   This is the foo
+
+Bar.                   The bar stuff
+
 ```
 
 
 `foo --help`
 
 ```
-foo                This is the foo
+Foo.Run                
+  -number              Int32
+  -day                 Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday
 
-arguments:
-  -number          Int32
-  -day             Sunday | Monday | Tuesday | Wednesday | Thursday | Friday | Saturday
 ```
 
 
 `bar --help`
 
 ```
-bar                The bar stuff
+Bar.Run                
+  -number              Really a number
+  -timestamp           A date for something
 
-arguments:
-  -number          Really a number
-  -timestamp       A date for something
 ```
 
 
 `--help`
 
 ```
-commands:
-  foo              This is the foo
-  bar              The bar stuff
-  bop              mmmmmmmm
+Foo.                   This is the foo
+
+Bar.                   The bar stuff
+
+Bop.                   mmmmmmmm
+
 ```
 
 
 `bop --help`
 
 ```
-bop                mmmmmmmm
+Bop.Run                do run run
+  -number              another number
+  -timestamp           more stuff
 
-arguments:
-  -number          another number
-  -timestamp       more stuff
 ```
 
 
 `baz --help`
 
 ```
-baz                
+Baz.Run                
+  -s                   more stuff
 
-arguments:
-  -s               more stuff
 ```
 
 

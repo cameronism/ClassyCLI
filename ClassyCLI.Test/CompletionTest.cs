@@ -56,6 +56,24 @@ namespace ClassyCLI.Test
             }
         }
 
+        private class TestInvocation : Invocation
+        {
+            public TestInvocation(TextWriter stdout, TextWriter stderr, bool ignoreCase)
+            : base(stdout, stderr, ignoreCase)
+            {
+            }
+
+            public List<string> Completions { get; set; } = new List<string>();
+
+            protected override void AddCompletion(string value) => Completions.Add(value);
+
+            protected override int ExitCode
+            {
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
+            }
+        }
+
         [Fact]
         public void Test1()
         {
@@ -185,7 +203,9 @@ namespace ClassyCLI.Test
             _sb.AppendLine("```");
             _sb.AppendLine();
 
-            var completions = Runner.Complete(line, position, types);
+            var invocation = new TestInvocation(null, null, ignoreCase: true);
+            invocation.InvokeCompletion(types, line, position);
+            var completions = invocation.Completions;
             var any = false;
             foreach (var completion in completions)
             {

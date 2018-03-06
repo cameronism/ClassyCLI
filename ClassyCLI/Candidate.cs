@@ -34,7 +34,7 @@ namespace ClassyCLI
                 result[i++] = new Candidate { Type = type, Name = type.FullName.Replace('+', '.') };
             }
 
-            var prefix = Runner.CommonPrefix(result.Select(item => item.Name));
+            var prefix = CommonPrefix(result.Select(item => item.Name));
             var len = prefix.Length;
             if (len > 0)
             {
@@ -45,6 +45,47 @@ namespace ClassyCLI
             }
 
             return result;
+        }
+
+        public static string CommonPrefix(IEnumerable<string> names)
+        {
+            string prefix = null;
+            using (var e = names.GetEnumerator())
+            {
+                if (!e.MoveNext()) return null;
+                prefix = e.Current;
+
+                var ix = prefix.LastIndexOf('.', prefix.Length - 2);
+                prefix = ix > 0 ? prefix.Substring(0, ix + 1) : "";
+
+                while (e.MoveNext() && prefix.Length > 0)
+                {
+                    var name = e.Current;
+                    if (!name.StartsWith(prefix, StringComparison.Ordinal))
+                    {
+                        prefix = CommonPrefix(prefix, name);
+                    }
+                }
+            }
+
+            return prefix;
+        }
+
+        public static string CommonPrefix(string prefix, string name)
+        {
+            do
+            {
+                var ix = prefix.LastIndexOf('.', prefix.Length - 2);
+                if (ix <= 0)
+                {
+                    prefix = "";
+                    break;
+                }
+
+                prefix = prefix.Substring(0, ix + 1);
+            } while (!name.StartsWith(prefix, StringComparison.Ordinal));
+
+            return prefix;
         }
     }
 }

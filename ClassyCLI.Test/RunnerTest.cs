@@ -231,17 +231,19 @@ namespace ClassyCLI.Test
         private void Run(string[] args, IEnumerable<Type> classes, Type expectException = null)
         {
             $"Running {string.Join(" ", args)}".H2();
+            var invocation = new Invocation(null, null, ignoreCase: true);
+            InvocationResult result = null;
 
             if (expectException == null)
             {
                 // no try/catch for easier debugging by default
-                Runner.Run(args, classes, ignoreCase: true);
+                result =  invocation.Invoke(args, classes);
                 return;
             }
 
             try
             {
-                Runner.Run(args, classes, ignoreCase: true);
+                result =  invocation.Invoke(args, classes);
             }
             catch (Exception e)
             {
@@ -302,7 +304,7 @@ namespace ClassyCLI.Test
                 }
                 _sb.AppendLine();
 
-                var prefix = Runner.CommonPrefix(names);
+                var prefix = Candidate.CommonPrefix(names);
                 if (prefix == null)
                 {
                     _sb.AppendLine("_null_");
