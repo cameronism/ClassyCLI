@@ -398,6 +398,9 @@ namespace ClassyCLI
             // doing anything intelligent based on what comes later sounds _very_ challenging
             arg.Trim(position);
 
+            // ignore command name
+            arg = arg?.Next;
+
             var candidates = Candidate.FromTypes(types);
             Suggestion suggestions = null;
             if (!string.IsNullOrWhiteSpace(arg.Value))

@@ -204,7 +204,7 @@ namespace ClassyCLI.Test
             _sb.AppendLine();
 
             var invocation = new TestInvocation(null, null, ignoreCase: true);
-            invocation.InvokeCompletion(types, line, position);
+            invocation.InvokeCompletion(types, "foo " + line, position + 4);
             var completions = invocation.Completions;
             var any = false;
             foreach (var completion in completions)

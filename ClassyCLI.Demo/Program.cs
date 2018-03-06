@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -13,6 +14,8 @@ namespace ClassyCLI.Demo
 
         static void Main(string[] args)
         {
+            // File.AppendAllLines("/Users/cameron/demo.log", args);
+            // File.AppendAllLines("/Users/cameron/demo.log", new[] { "------------------------------------------" });
             Arguments = args;
             var result = ClassyCLI.Runner.Run();
 
@@ -43,6 +46,28 @@ namespace ClassyCLI.Demo
                     Console.Write($"{b:x2}");
                 }
                 Console.WriteLine();
+            }
+        }
+
+        public void Bash(string alias)
+        {
+            var dll = GetType().Assembly.Location;
+            var lines = new[]
+            {
+                $"alias {alias}=\"dotnet {dll}\"",
+                $"_{alias}_bash_complete()",
+                $"{{",
+                $"  local word=${{COMP_WORDS[COMP_CWORD]}}",
+                $"  local {alias}path=${{COMP_WORDS[1]}}",
+
+                $"  local completions=(\"$(dotnet {dll} --complete --position ${{COMP_POINT}} \"${{COMP_LINE}}\")\")",
+                $"  COMPREPLY=( $(compgen -W \"$completions\" -- \"$word\") )",
+                $"}}",
+                $"complete -f -F _{alias}_bash_complete {alias}",
+            };
+            foreach (var line in lines)
+            {
+                Console.WriteLine(line);
             }
         }
 
