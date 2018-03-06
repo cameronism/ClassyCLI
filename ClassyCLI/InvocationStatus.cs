@@ -10,5 +10,7 @@ namespace ClassyCLI
         Complete,
         ArgumentMissing,
         ArgumentConversionFailed,
+        BashCompletionScript,
+        PowerShellCompletionScript,
     }
 }

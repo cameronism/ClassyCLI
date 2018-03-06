@@ -25,6 +25,7 @@ namespace ClassyCLI
             if (_list == null)
             {
                 _list = (ParameterList)_create.Invoke(null, null);
+                _list.ParameterInfo = ParameterInfo;
             }
             _list.Add(s, ignoreCase: ignoreCase);
             HasValue = true;

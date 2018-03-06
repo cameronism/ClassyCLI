@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace ClassyCLI
 {
-    class Parameter
+    internal class Parameter
     {
         public string Name { get; private set; }
         public ParameterInfo ParameterInfo { get; private set; }
@@ -17,14 +17,14 @@ namespace ClassyCLI
 
         public virtual void SetValue(object s, bool ignoreCase)
         {
-            var value = ConvertValue(s, ParameterInfo.ParameterType, ignoreCase);
+            var value = ConvertValue(s, ParameterInfo, ignoreCase);
             Parameters[Index] = value;
             HasValue = true;
         }
 
         public virtual void SetValue(string s, bool ignoreCase)
         {
-            var value = ConvertValue(s, ParameterInfo.ParameterType, ignoreCase);
+            var value = ConvertValue(s, ParameterInfo, ignoreCase);
             Parameters[Index] = value;
             HasValue = true;
         }
@@ -65,7 +65,12 @@ namespace ClassyCLI
             return new Parameter();
         }
 
-        public static object ConvertValue(object value, Type destination, bool ignoreCase)
+        public static object ConvertValue(object value, ParameterInfo parameter, bool ignoreCase)
+        {
+            return ConvertValue(value, parameter.ParameterType, parameter, ignoreCase);
+        }
+
+        public static object ConvertValue(object value, Type destination, ParameterInfo parameter, bool ignoreCase)
         {
             var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             if (value == null)
@@ -101,9 +106,16 @@ namespace ClassyCLI
             var type = underlying ?? destination;
             if (type.IsEnum)
             {
-                if (s != null) return Enum.Parse(type, s, ignoreCase: ignoreCase);
+                try
+                {
+                    if (s != null) return Enum.Parse(type, s, ignoreCase: ignoreCase);
 
-                return Enum.ToObject(type, value);
+                    return Enum.ToObject(type, value);
+                }
+                catch (Exception e)
+                {
+                    throw new ConversionException(parameter, e);
+                }
             }
 
             if (s != null)
@@ -127,7 +139,7 @@ namespace ClassyCLI
                     if (TryGetFileInfo(s, out var fi)) return fi.OpenText();
 
                     // FIXME this is the part where we'll want to be more helpful 
-                    throw new Exception("can't find that");
+                    throw new ConversionException(parameter, null);
                 }
 
                 if (type == typeof(TextWriter))
@@ -151,23 +163,43 @@ namespace ClassyCLI
                 var converter = TypeDescriptor.GetConverter(type);
                 if (converter.CanConvertFrom(typeof(string)))
                 {
-                    return converter.ConvertFromString(s);
+                    try
+                    {
+                        return converter.ConvertFromString(s);
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ConversionException(parameter, e);
+                    }
                 }
 
                 var ctor = type.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(string) }, null);
 
                 if (ctor != null)
                 {
-                    // nicer error here too
-                    return ctor.Invoke(new[] { s });
+                    try
+                    {
+                        return ctor.Invoke(new[] { s });
+                    }
+                    catch (Exception e)
+                    {
+                        throw new ConversionException(parameter, e);
+                    }
                 }
 
-                // FIXME this is the part where we'll want to be more helpful 
-                throw new Exception("this will never work");
+                // this will never work
+                throw new ConversionException(parameter, null);
             }
 
-            // only non-strings should be left - which should be from DefaultAttribute
-            return Convert.ChangeType(value, type);
+            try
+            {
+                // only non-strings should be left - which should be from DefaultAttribute
+                return Convert.ChangeType(value, type);
+            }
+            catch (Exception e)
+            {
+                throw new ConversionException(parameter, e);
+            }
         }
 
         static bool TryGetFileInfo(string path, out FileInfo fi)

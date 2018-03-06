@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace ClassyCLI
 {
@@ -9,6 +10,7 @@ namespace ClassyCLI
         public abstract void Add(string s, bool ignoreCase);
         public abstract object Convert();
         public static ParameterList Create<TItem, TList>() => new ParameterList<TItem, TList>();
+        public ParameterInfo ParameterInfo { get; set; }
     }
 
     sealed class ParameterList<TItem, TList> : ParameterList
@@ -17,7 +19,7 @@ namespace ClassyCLI
 
         public override void Add(string s, bool ignoreCase)
         {
-            _list.Add((TItem)Parameter.ConvertValue(s, typeof(TItem), ignoreCase));
+            _list.Add((TItem)Parameter.ConvertValue(s, typeof(TItem), ParameterInfo, ignoreCase));
         }
 
         public override object Convert()

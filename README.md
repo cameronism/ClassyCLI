@@ -1,6 +1,6 @@
 # ClassyCLI
 
-**WORK IN PROGRESS -- DON'T TRY THIS YET**
+**WORK IN PROGRESS -- EARLY BUT FUNCTIONAL**
 
 `ClassyCLI.Run()` provides an excellent command line interface to your existing methods and 
 requires no extra boilerplate or configuration.  `ClassyCLI` also supports command line completion

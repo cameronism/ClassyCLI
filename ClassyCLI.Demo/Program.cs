@@ -71,6 +71,26 @@ namespace ClassyCLI.Demo
             }
         }
 
+        public void Powershell(string alias)
+        {
+            var dll = GetType().Assembly.Location;
+            var lines = new[]
+            {
+                $"# PowerShell parameter completion shim for {alias}",
+                $"function {alias} {{ dotnet {dll} $args }}",
+                $"Register-ArgumentCompleter -Native -CommandName {alias} -ScriptBlock {{",
+                $"  param($commandName, $wordToComplete, $cursorPosition)",
+                $"  dotnet {dll} --complete --position $cursorPosition \"$wordToComplete\" | ForEach-Object {{",
+                $"    [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)",
+                $"  }}",
+                $"}}",
+            };
+            foreach (var line in lines)
+            {
+                Console.WriteLine(line);
+            }
+        }
+
         [Description("things go here")]
         public class Things
         {

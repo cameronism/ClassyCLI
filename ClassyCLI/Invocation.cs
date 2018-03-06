@@ -55,25 +55,79 @@ namespace ClassyCLI
                 {
                     return InvokeCompletion(arg, types);
                 }
+                else if (outcome == InvocationStatus.BashCompletionScript || outcome == InvocationStatus.PowerShellCompletionScript)
+                {
+                    return InvokeCreateCompletionScript(match.Next, outcome);
+                }
             }
 
             return InvokeMethod(arg, types);
         }
 
+        private InvocationResult InvokeCreateCompletionScript(Argument next, InvocationStatus outcome)
+        {
+            var alias = next?.Value;
+            if (string.IsNullOrWhiteSpace(alias))
+            {
+                _stderr.WriteLine("Missing required parameter command name.");
+                ExitCode = 1;
+                return new InvocationResult { InvocationStatus = InvocationStatus.ArgumentConversionFailed };
+            }
+
+            string run;
+            var dll = Assembly.GetEntryAssembly().Location;
+
+            // ASSUMPTION assume dotnet core unless entry assembly has extension `exe`
+            if (string.Equals(Path.GetExtension(dll), ".exe", StringComparison.OrdinalIgnoreCase))
+            {
+                run = dll;
+            }
+            else
+            {
+                run = "dotnet " + dll;
+            }
+
+            if (outcome == InvocationStatus.BashCompletionScript)
+            {
+                _stdout.WriteLine($"alias {alias}=\"{run}\"");
+                _stdout.WriteLine($"_{alias}_bash_complete()");
+                _stdout.WriteLine($"{{");
+                _stdout.WriteLine($"  local word=${{COMP_WORDS[COMP_CWORD]}}");
+                _stdout.WriteLine($"  local {alias}path=${{COMP_WORDS[1]}}");
+                _stdout.WriteLine($"  local completions=(\"$({run} --complete --position ${{COMP_POINT}} \"${{COMP_LINE}}\")\")");
+                _stdout.WriteLine($"  COMPREPLY=( $(compgen -W \"$completions\" -- \"$word\") )");
+                _stdout.WriteLine($"}}");
+                _stdout.WriteLine($"complete -f -F _{alias}_bash_complete {alias}");
+
+            }
+            else if (outcome == InvocationStatus.PowerShellCompletionScript)
+            {
+                _stdout.WriteLine($"function {alias} {{ {run} $args }}");
+                _stdout.WriteLine($"Register-ArgumentCompleter -Native -CommandName {alias} -ScriptBlock {{");
+                _stdout.WriteLine($"  param($commandName, $wordToComplete, $cursorPosition)");
+                _stdout.WriteLine($"  {run} --complete --position $cursorPosition \"$wordToComplete\" | ForEach-Object {{");
+                _stdout.WriteLine($"    [System.Management.Automation.CompletionResult]::new($_, $_, 'ParameterValue', $_)");
+                _stdout.WriteLine($"  }}");
+                _stdout.WriteLine($"}}");
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return new InvocationResult { InvocationStatus = outcome };
+        }
+
         public InvocationResult InvokeMethod(Argument arg, IEnumerable<Type> types)
         {
+            var head = arg;
             var candidates = Candidate.FromTypes(types);
             var suggestion = GetSuggestions(arg?.Value ?? string.Empty, candidates);
 
             if (suggestion == null || suggestion.Method == null || suggestion.Next != null || suggestion.Value.Length != arg.Value.Length)
             {
-                var status = string.IsNullOrEmpty(arg?.Value) ? InvocationStatus.NoMethodSpecified : InvocationStatus.NoMethodFound;
-                if (status == InvocationStatus.NoMethodFound)
-                {
-                    _stderr.WriteLine("Method not found: " + arg.Value);
-                }
                 var helpResult = InvokeHelp(arg, types, _stderr);
-                helpResult.InvocationStatus = status;
+                helpResult.InvocationStatus = string.IsNullOrEmpty(arg?.Value) ? InvocationStatus.NoMethodSpecified : InvocationStatus.NoMethodFound;
                 ExitCode = 1;
                 return helpResult;
             }
@@ -88,57 +142,72 @@ namespace ClassyCLI
             var positionalOnly = false;
             var named = false;
 
-            while (arg != null)
+            try
             {
-                var value = arg.Value;
-                arg = arg.Next;
-
-                if (destination == null)
+                while (arg != null)
                 {
-                    if (!positionalOnly && TryGetNamedParam(value, info, out destination))
+                    var value = arg.Value;
+                    arg = arg.Next;
+
+                    if (destination == null)
                     {
-                        named = true;
-                        continue;
+                        if (!positionalOnly && TryGetNamedParam(value, info, out destination))
+                        {
+                            named = true;
+                            continue;
+                        }
+
+                        if (value == "--")
+                        {
+                            positionalOnly = true;
+                            continue;
+                        }
+
+                        do
+                        {
+                            positional++;
+                            destination = info[positional];
+                        } while (destination.HasValue);
                     }
 
-                    if (value == "--")
-                    {
-                        positionalOnly = true;
-                        continue;
-                    }
+                    destination.SetValue(value, _ignoreCase);
 
-                    do
+                    if (named || !(destination is EnumerableParameter))
                     {
-                        positional++;
-                        destination = info[positional];
-                    } while (destination.HasValue);
+                        destination = null;
+                        named = false;
+                    }
                 }
 
-                destination.SetValue(value, _ignoreCase);
-
-                if (named || !(destination is EnumerableParameter))
+                foreach (var param in info)
                 {
-                    destination = null;
-                    named = false;
+                    if (param.HasValue)
+                    {
+                        param.SetFinalValue();
+                        continue;
+                    }
+
+                    var paramInfo = param.ParameterInfo;
+                    if (!paramInfo.HasDefaultValue)
+                    {
+                        _stderr.WriteLine("Missing required parameter: " + paramInfo.Name);
+                        var helpResult = InvokeHelp(head, types, _stderr);
+                        helpResult.InvocationStatus = InvocationStatus.ArgumentMissing;
+                        ExitCode = 1;
+                        return helpResult;
+                    }
+
+                    param.SetValue(paramInfo.DefaultValue, _ignoreCase);
                 }
             }
-
-            foreach (var param in info)
+            catch (ConversionException ce)
             {
-                if (param.HasValue)
-                {
-                    param.SetFinalValue();
-                    continue;
-                }
-
-                var paramInfo = param.ParameterInfo;
-                if (!paramInfo.HasDefaultValue)
-                {
-                    // FIXME this is the part where we'll want to be more helpful 
-                    throw new Exception("need more");
-                }
-
-                param.SetValue(paramInfo.DefaultValue, _ignoreCase);
+                _stderr.WriteLine("Fail to parse parameter: " + ce.Parameter.Name);
+                var helpResult = InvokeHelp(head, types, _stderr);
+                helpResult.InvocationStatus = InvocationStatus.ArgumentConversionFailed;
+                helpResult.Exception = ce;
+                ExitCode = 1;
+                return helpResult;
             }
 
             object result;
@@ -148,6 +217,8 @@ namespace ClassyCLI
             }
             catch (Exception e)
             {
+                _stderr.WriteLine(e.ToString());
+                ExitCode = 2;
                 return new InvocationResult
                 {
                     Exception = e,
@@ -227,10 +298,9 @@ namespace ClassyCLI
             var candidates = Candidate.FromTypes(types);
             var suggestion = GetSuggestions(arg?.Value ?? string.Empty, candidates);
 
-            if (suggestion == null && arg?.Value != null)
+            if (arg?.Value != null && !string.Equals(arg.Value, suggestion?.Value, _comparison))
             {
                 tw.WriteLine("Method not found: " + arg.Value);
-                return new InvocationResult { InvocationStatus = InvocationStatus.Help };
             }
 
             while (suggestion != null)
@@ -463,9 +533,14 @@ namespace ClassyCLI
             if (!positionalOnly && ((arg.Value == "" && lastNamedParameter == null) || PossibleParameterName(arg.Value)))
             {
                 // Span<char> -- sigh
-                var value = arg.Value.Length >= 1 ? arg.Value.Substring(1) : arg.Value;
-                // return Matching(parameters.Select(p => p.Name), value).Select(p => '-' + p);
-                AddCompletions(Matching(parameters.Select(p => p.Name), value).Select(p => '-' + p));
+                var value = arg.Value;
+                var sigil = '-';
+                if (arg.Value.Length >= 1)
+                {
+                    sigil = value[0];
+                    value = value.Substring(1);
+                }
+                AddCompletions(Matching(parameters.Select(p => p.Name), value).Select(p => sigil + p));
                 return new InvocationResult { InvocationStatus = InvocationStatus.Complete };
             }
 
@@ -540,6 +615,8 @@ namespace ClassyCLI
                     case "--": return (InvocationStatus.MethodInvoked, null, null);
                     case "--complete": return (InvocationStatus.Complete, prev, arg);
                     case "--help": return (InvocationStatus.Help, prev, arg);
+                    case "--bash-completion-script": return (InvocationStatus.BashCompletionScript, prev, arg);
+                    case "--powershell-completion-script": return (InvocationStatus.PowerShellCompletionScript, prev, arg);
                 }
 
                 prev = arg;
