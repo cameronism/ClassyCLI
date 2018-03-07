@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://opensource.org/licenses/Apache-2.0</licenseUrl>
+    <projectUrl>https://github.com/cameronism/ClassyCLI</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Improve parameter descriptions and omit inapplicable types and methods.</releaseNotes>
+    <copyright>Copyright 2018</copyright>
+    <tags>command line arguments parser CLI commandline command-line Console </tags>
+  </metadata>
+</package>

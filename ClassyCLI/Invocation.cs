@@ -14,7 +14,7 @@ namespace ClassyCLI
         protected readonly bool _ignoreCase;
         protected readonly TextWriter _stdout;
         protected readonly TextWriter _stderr;
-        protected readonly char[] _prefix = new[] { '-', '/', '@', '=' };
+        const string _sigil = "-/@=";
 
         public Invocation(TextWriter stdout, TextWriter stderr, bool ignoreCase)
         {
@@ -274,19 +274,10 @@ namespace ClassyCLI
 
             if (string.IsNullOrEmpty(name)) return false;
 
-            var ix = name.IndexOfAny(_prefix);
-            if (ix != 0) return false;
-
-            // remove leading and trailing prefix characters
-            // technically remove them all -- super inefficient
-            while (ix != -1)
-            {
-                name = name.Remove(ix, 1);
-                ix = name.IndexOfAny(_prefix);
-            }
+            if (_sigil.IndexOf(name[0]) == -1) return false;
+            name = name.Substring(1);
 
             if (name.Length == 0) return false;
-
 
             param = parameters.SingleOrDefault(p => p.Name.StartsWith(name, _comparison));
             return param != null;
@@ -343,7 +334,12 @@ namespace ClassyCLI
                 return description;
             }
 
-            var type = param.ParameterType;
+            var original = param.ParameterType;
+            var underlying = Nullable.GetUnderlyingType(original);
+
+            // ignore nullable for now, would be nice to print someday
+            var type = underlying ?? original;
+
             if (type.IsEnum)
             {
                 return string.Join(" | ", Enum.GetNames(type));
@@ -372,7 +368,31 @@ namespace ClassyCLI
             }
 
             // _hopefully_ better than nothing
-            return type.FullName;
+            return GetTypeName(type);
+        }
+
+        private static string GetTypeName(Type t)
+        {
+            if (t.IsArray)
+            {
+                return GetTypeName(t.GetElementType()) + "[]";
+            }
+            if (!t.IsGenericType)
+            {
+                return t.FullName;
+            }
+
+            var name = t.FullName;
+            var ix = name.IndexOf('`');
+            if (ix != -1) name = name.Substring(0, ix);
+            var args = t.GetGenericArguments();
+
+            for (int i = 0; i < args.Length; i++)
+            {
+                name += (i == 0 ? "<" : ", ") + GetTypeName(args[i]);
+            }
+
+            return name + '>';
         }
 
         private static void DescribeClass(Candidate candidate, out string description)
@@ -601,7 +621,7 @@ namespace ClassyCLI
 
         private bool PossibleParameterName(string s)
         {
-            return s?.Length >= 1 && Array.IndexOf(_prefix, s[0]) != -1;
+            return s?.Length >= 1 && _sigil.IndexOf(s[0]) != -1;
         }
 
         /// <summary>Figure out if we should actually invoke methods, output help or complete arguments</summary>
@@ -635,6 +655,15 @@ namespace ClassyCLI
             for (int i = 0; i < candidates.Length; i++)
             {
                 var candidate = candidates[i];
+                var type = candidate.Type;
+                if (type.IsEnum || 
+                    typeof(Delegate).IsAssignableFrom(type) || 
+                    !(type.IsClass || type.IsValueType) ||
+                    type.IsGenericType)
+                {
+                    continue;
+                }
+
                 var name = candidate.Name;
                 var typeShorter = name.Length < value.Length;
                 string shorter, longer;
@@ -655,7 +684,7 @@ namespace ClassyCLI
                 name = name + '.';
                 if (!typeShorter)
                 {
-                    Suggestion.Append(ref head, ref tail, name, candidate.Type, i);
+                    Suggestion.Append(ref head, ref tail, name, type, i);
                     continue;
                 }
 
@@ -694,10 +723,19 @@ namespace ClassyCLI
             }
         }
 
+        private static bool CouldInvoke(MethodInfo mi)
+        {
+            if (mi.IsAbstract) return false;
+            if (mi.IsGenericMethod) return false;
+            if (mi.IsSpecialName) return false;
+
+            return true;
+        }
+
         private static IEnumerable<MethodInfo> GetMethods(Type cls)
         {
             return cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static)
-                .Where(m => OriginalDeclaringType(m) != typeof(object));
+                .Where(m => CouldInvoke(m) && OriginalDeclaringType(m) != typeof(object));
         }
 
         private static Type OriginalDeclaringType(MethodInfo m)

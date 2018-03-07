@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -97,5 +98,68 @@ namespace ClassyCLI.Demo
             [Description("let's take a nap")]
             public Task Sleep(int millis = 100) => Task.Delay(millis);
         }
+    }
+
+    public enum MyEnum
+    {
+        Enums,
+        Are,
+        Great,
+        For,
+        Completion,
+        But,
+        Have,
+        No,
+        Methods,
+    }
+
+    public struct Foo
+    {
+        public int _value;
+        public Foo(int value)
+        {
+            _value = value;
+        }
+
+        public int HopeYouLikeDefaults() => _value;
+
+        public static MyEnum Bar(MyEnum it) => it;
+        public static MyEnum? Bar2(MyEnum? it) => it;
+        public static void Bar3(params MyEnum[] it) {}
+        public static void Bar4(params MyEnum?[] it) {}
+        public static void Bar5(List<MyEnum> it) {}
+        public static void Bar6(List<MyEnum?> it) {}
+        public static void Bar7(Dictionary<MyEnum?, string> it) {}
+        public static void Bar8(Dictionary<MyEnum?, string>[] it) {}
+
+        // properties are currently skipped 
+        public static int PropertiesSomeday { get => 42; }
+
+        // indexers are currently skipped 
+        public int this[int i] { get { return  i; } }
+    }
+
+    public delegate void WeSkipThese();
+
+    public interface IHopeWeSkipThis {}
+
+    public abstract class HowAbstract
+    {
+        public static void ThisWorks() { }
+        public abstract void ThisDoesNot();
+        public static void ThisAlsoDoesNot<T>(T item) { }
+    }
+
+    public class Generic<T>
+    {
+        public virtual string Nope() => "nope";
+
+        // would have to .MakeGenericType with dummy params
+        public static void MaybeSomeday() { }
+    }
+
+    public class NotSo : Generic<int>
+    {
+        public override string Nope() => "yup";
     }
 }
