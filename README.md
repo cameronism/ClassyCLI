@@ -144,6 +144,11 @@ _all TODO_
 
 Soon:
 
+- omit types with no (callable) methods
+- dispose any created `IDisposable`s
+- fix xml doc search for parameterless methods
+- check for `bool ExampleType.TryParse(string, out ExampleType)` pattern
+- expose exception(s) that can be thrown for argument errors that should cause help to be printed again
 - CancellationToken parameter support -- automatically wired up to `ctrl-c`
 - numeric enum story
 - better flag enum support

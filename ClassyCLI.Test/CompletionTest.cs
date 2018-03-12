@@ -41,6 +41,7 @@ namespace ClassyCLI.Test
             public void M4(bool b) { }
             public void M5(bool? b) { }
             public void M6(params DayOfWeek[] d) { }
+            public void M7(int foo1, int foo2) { }
 
             // System.DateTimeKind is another "simple" enum
         }
@@ -183,6 +184,12 @@ namespace ClassyCLI.Test
             "Params(-ish) parameters can be used multiple times".H2();
             Complete(types, "C3.M6 -d ");
             Complete(types, "C3.M6 -d Sunday -d ");
+
+            "Handle similarly named parameters".H2();
+            Complete(types, "C3.M7 -");
+            Complete(types, "C3.M7 -f");
+            Complete(types, "C3.M7 -foo");
+            Complete(types, "C3.M7 -foo1");
 
             Approvals.Approve(_sb);
         }

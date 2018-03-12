@@ -133,7 +133,6 @@ namespace ClassyCLI
             }
 
             var method = suggestion.Method;
-            var instance = method.IsStatic ? null : Activator.CreateInstance(suggestion.Type);
             var (args, info) = Parameter.Create(method.GetParameters());
 
             arg = arg.Next;
@@ -151,15 +150,15 @@ namespace ClassyCLI
 
                     if (destination == null)
                     {
-                        if (!positionalOnly && TryGetNamedParam(value, info, out destination))
+                        if (!positionalOnly && value == "--")
                         {
-                            named = true;
+                            positionalOnly = true;
                             continue;
                         }
 
-                        if (value == "--")
+                        if (!positionalOnly && TryGetNamedParam(value, info, out destination))
                         {
-                            positionalOnly = true;
+                            named = true;
                             continue;
                         }
 
@@ -208,6 +207,35 @@ namespace ClassyCLI
                 helpResult.Exception = ce;
                 ExitCode = 1;
                 return helpResult;
+            }
+            catch (UnknownParameterException upe)
+            {
+                _stderr.WriteLine("Unknown parameter: " + upe.Name);
+                var helpResult = InvokeHelp(head, types, _stderr);
+                helpResult.InvocationStatus = InvocationStatus.UnknownParameter;
+                helpResult.Exception = upe;
+                ExitCode = 1;
+                return helpResult;
+            }
+
+            object instance = null;
+            if (!method.IsStatic)
+            {
+                try
+                {
+                    instance = Activator.CreateInstance(suggestion.Type);
+                }
+                catch (Exception e)
+                {
+                    _stderr.WriteLine(e.ToString());
+                    ExitCode = 3;
+                    return new InvocationResult
+                    {
+                        Exception = e,
+                        InvocationStatus = InvocationStatus.InstanceCreationFailed,
+                        Method = method,
+                    };
+                }
             }
 
             object result;
@@ -279,8 +307,12 @@ namespace ClassyCLI
 
             if (name.Length == 0) return false;
 
-            param = parameters.SingleOrDefault(p => p.Name.StartsWith(name, _comparison));
-            return param != null;
+            param = parameters.SingleOrDefault(p => p.Name.Equals(name, _comparison));
+            if (param == null)
+            {
+                throw new UnknownParameterException(name);
+            }
+            return true;
         }
 
         public InvocationResult InvokeHelp(Argument arg, IEnumerable<Type> types, TextWriter tw)

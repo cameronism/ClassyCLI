@@ -416,7 +416,7 @@ null
 "s"
 ```
 
-### dd System.Collections.Generic.IList<System.DateTime>
+### d System.Collections.Generic.IList<System.DateTime>
 
 ```
 [
@@ -436,7 +436,7 @@ null
 "s"
 ```
 
-### dd System.Collections.Generic.IList<System.DateTime>
+### d System.Collections.Generic.IList<System.DateTime>
 
 ```
 [
@@ -456,7 +456,7 @@ null
 "s"
 ```
 
-### dd System.Collections.Generic.IList<System.DateTime>
+### d System.Collections.Generic.IList<System.DateTime>
 
 ```
 [
@@ -475,7 +475,7 @@ null
 "s"
 ```
 
-### dd System.Collections.Generic.IList<System.DateTime>
+### d System.Collections.Generic.IList<System.DateTime>
 
 ```
 [
@@ -494,7 +494,7 @@ null
 "s"
 ```
 
-### dd System.Collections.Generic.IList<System.DateTime>
+### d System.Collections.Generic.IList<System.DateTime>
 
 ```
 [
@@ -607,6 +607,19 @@ null
 }
 ```
 
+
+# ambiguous argument name
+
+## Running E1.OQ -foo 42
+
+stderr:
+```
+Unknown parameter: foo
+E1.OQ                  
+  -foo1                Int32
+  -foo2                Int32
+
+```
 
 # tasks
 

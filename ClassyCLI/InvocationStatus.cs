@@ -12,5 +12,7 @@ namespace ClassyCLI
         ArgumentConversionFailed,
         BashCompletionScript,
         PowerShellCompletionScript,
+        InstanceCreationFailed,
+        UnknownParameter,
     }
 }

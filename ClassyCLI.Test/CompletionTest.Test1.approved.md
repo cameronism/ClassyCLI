@@ -633,3 +633,40 @@ C3.M6 -d Sunday -d
 - Saturday
 
 
+## Handle similarly named parameters
+
+```
+C3.M7 -
+       ^
+```
+
+- -foo1
+- -foo2
+
+
+```
+C3.M7 -f
+        ^
+```
+
+- -foo1
+- -foo2
+
+
+```
+C3.M7 -foo
+          ^
+```
+
+- -foo1
+- -foo2
+
+
+```
+C3.M7 -foo1
+           ^
+```
+
+- -foo1
+
+

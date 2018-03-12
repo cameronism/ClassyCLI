@@ -75,7 +75,7 @@ namespace ClassyCLI.Test
             public void OF(params string[] ss) => Log(this, new { ss });
             public void OG(List<object> oo) => Log(this, new { oo });
             public void OH(IEnumerable<int> ii) => Log(this, new { ii });
-            public void OI(string s, IList<DateTime> dd) => Log(this, new { s, dd });
+            public void OI(string s, IList<DateTime> d) => Log(this, new { s, d });
             public void OJ(IEnumerable<int> ii = null) => Log(this, new { ii });
             public void OK(bool b) => Log(this, new { b });
             public void OL(bool? b) => Log(this, new { b });
@@ -83,6 +83,7 @@ namespace ClassyCLI.Test
             public void OP(System.Text.RegularExpressions.Regex ct) => Log(this, new { ct });
             public Task ON() { Log(this, new { }); return _task; }
             public ValueTask<object> OO() { Log(this, new { }); return _valueTask; }
+            public void OQ(int foo1 = 1, int foo2 = 2) => Log(this, new { foo1, foo2 });
         }
 
         private class E2 : E1
@@ -196,6 +197,9 @@ namespace ClassyCLI.Test
             Run("E1.OM foo", types);
             Run("E1.OP foo", types);
 
+            "ambiguous argument name".H1();
+            Run("E1.OQ -foo 42", types);
+
 
             "tasks".H1();
             var tcs = new TaskCompletionSource<object>();
@@ -231,31 +235,47 @@ namespace ClassyCLI.Test
         private void Run(string[] args, IEnumerable<Type> classes, Type expectException = null)
         {
             $"Running {string.Join(" ", args)}".H2();
-            var invocation = new Invocation(null, null, ignoreCase: true);
+            var errsb = new StringBuilder();
+            var invocation = new Invocation(stdout: null, stderr: new StringWriter(errsb), ignoreCase: true);
             InvocationResult result = null;
-
-            if (expectException == null)
-            {
-                // no try/catch for easier debugging by default
-                result =  invocation.Invoke(args, classes);
-                return;
-            }
 
             try
             {
-                result =  invocation.Invoke(args, classes);
-            }
-            catch (Exception e)
-            {
-                if (expectException != null && expectException.IsAssignableFrom(e.GetType()))
+                if (expectException == null)
                 {
-
-                    $"Exception {expectException.GetTypeName()}".H2();
-                    _sb.AppendLine();
+                    // no try/catch for easier debugging by default
+                    result =  invocation.Invoke(args, classes);
                     return;
                 }
 
-                throw;
+                try
+                {
+                    result =  invocation.Invoke(args, classes);
+                }
+                catch (Exception e)
+                {
+                    if (expectException != null && expectException.IsAssignableFrom(e.GetType()))
+                    {
+
+                        $"Exception {expectException.GetTypeName()}".H2();
+                        _sb.AppendLine();
+                        return;
+                    }
+
+                    throw;
+                }
+            }
+            finally
+            {
+                if (errsb.Length != 0)
+                {
+                    _sb.AppendLine("stderr:");
+                    _sb.AppendLine("```");
+                    _sb.Append(errsb.ToString());
+                    _sb.AppendLine("```");
+                    _sb.AppendLine();
+                }
+
             }
         }
 
