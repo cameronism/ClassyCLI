@@ -144,6 +144,7 @@ _all TODO_
 
 Soon:
 
+- fix  `-enumerable                System.Collections.Generic.IList<SomeEnum>`
 - omit types with no (callable) methods
 - dispose any created `IDisposable`s
 - fix xml doc search for parameterless methods
