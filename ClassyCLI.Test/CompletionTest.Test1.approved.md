@@ -633,6 +633,58 @@ C3.M6 -d Sunday -d
 - Saturday
 
 
+```
+C3.M6 -d  -d Sunday
+           ^
+```
+
+- -d
+
+
+```
+C3.M6 -d  -d Sunday
+          ^
+```
+
+- Sunday
+- Monday
+- Tuesday
+- Wednesday
+- Thursday
+- Friday
+- Saturday
+
+
+```
+C3.M6 -d  -d Sunday
+         ^
+```
+
+- Sunday
+- Monday
+- Tuesday
+- Wednesday
+- Thursday
+- Friday
+- Saturday
+
+
+```
+C3.M6 -d  -d Sunday
+        ^
+```
+
+- -d
+
+
+```
+C3.M6 -d  -d Sunday
+       ^
+```
+
+- -d
+
+
 ## Handle similarly named parameters
 
 ```

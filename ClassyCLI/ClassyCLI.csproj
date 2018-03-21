@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>ClassyCLI</PackageId>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
     <Authors>Cameron Jordan</Authors>
     <Company>cameronism</Company>
     <PackageProjectUrl>https://github.com/cameronism/ClassyCLI</PackageProjectUrl>
@@ -11,7 +11,7 @@
     <PackageTags>command;line;arguments;parser;CLI;commandline;command-line;Console</PackageTags>
     <PackageLicenseUrl>http://opensource.org/licenses/Apache-2.0</PackageLicenseUrl>
     <Description>Automatically provides an excellent command line interface to your existing .NET classes</Description>
-    <PackageReleaseNotes>Fix `--` handling, stricter named argument handling</PackageReleaseNotes>
+    <PackageReleaseNotes>Fix mid line completion crash</PackageReleaseNotes>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 

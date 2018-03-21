@@ -181,12 +181,13 @@ namespace ClassyCLI
                 }
                 else
                 {
-                    next.Value = next.Value.Substring(0, position - next.Offset);
+                    next.Value = next.Value.Substring(0, Math.Max(0, position - next.Offset));
+                    next.Next = null;
                 }
             }
             else
             {
-                tail.Value = tail.Value.Substring(0, position - tail.Offset);
+                tail.Value = tail.Value.Substring(0, Math.Max(0, position - tail.Offset));
                 tail.Next = null;
             }
         }

@@ -184,6 +184,11 @@ namespace ClassyCLI.Test
             "Params(-ish) parameters can be used multiple times".H2();
             Complete(types, "C3.M6 -d ");
             Complete(types, "C3.M6 -d Sunday -d ");
+            Complete(types, "C3.M6 -d  -d Sunday", -8);
+            Complete(types, "C3.M6 -d  -d Sunday", -9);
+            Complete(types, "C3.M6 -d  -d Sunday", -10);
+            Complete(types, "C3.M6 -d  -d Sunday", -11);
+            Complete(types, "C3.M6 -d  -d Sunday", -12);
 
             "Handle similarly named parameters".H2();
             Complete(types, "C3.M7 -");
