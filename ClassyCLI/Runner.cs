@@ -50,5 +50,7 @@ namespace ClassyCLI
             return result.Result;
             // return Run(arguments.Skip(1), types, ignoreCase: true);
         }
+
+        public static IRunnerBuilder Configure() => new RunnerBuilder();
     }
 }

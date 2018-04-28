@@ -3,7 +3,7 @@
     <ProjectReference Include="..\ClassyCLI\ClassyCLI.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="consoledump" Version="0.6.0.1" />
+    <PackageReference Include="consoledump" Version="0.7.0" />
   </ItemGroup>
   <PropertyGroup>
     <OutputType>Exe</OutputType>

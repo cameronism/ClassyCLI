@@ -1,6 +1,6 @@
 namespace ClassyCLI
 {
-    internal enum InvocationStatus
+    public enum InvocationStatus
     {
         MethodInvoked,
         MethodFaulted,

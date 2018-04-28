@@ -5,7 +5,7 @@ using System.Reflection;
 namespace ClassyCLI
 {
 
-    abstract class ParameterList
+    internal abstract class ParameterList
     {
         public abstract void Add(string s, bool ignoreCase);
         public abstract object Convert();
@@ -13,7 +13,7 @@ namespace ClassyCLI
         public ParameterInfo ParameterInfo { get; set; }
     }
 
-    sealed class ParameterList<TItem, TList> : ParameterList
+    internal sealed class ParameterList<TItem, TList> : ParameterList
     {
         private List<TItem> _list = new List<TItem>();
 

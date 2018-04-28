@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace ClassyCLI
 {
-    class EnumerableParameter : Parameter
+    internal class EnumerableParameter : Parameter
     {
         private ParameterList _list;
         private MethodInfo _create;

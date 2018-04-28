@@ -30,6 +30,8 @@ namespace ClassyCLI
             set { Environment.ExitCode = value; }
         }
 
+        public Func<Type, object> Factory { get; set; }
+
         private void AddCompletions(IEnumerable<string> values)
         {
             foreach (var value in values)
@@ -223,7 +225,7 @@ namespace ClassyCLI
             {
                 try
                 {
-                    instance = Activator.CreateInstance(suggestion.Type);
+                    instance = GetInstance(suggestion.Type);
                 }
                 catch (Exception e)
                 {
@@ -800,6 +802,17 @@ namespace ClassyCLI
             }
 
             return completions.Where(c => selector(c).StartsWith(value, _comparison));
+        }
+
+        private object GetInstance(Type type)
+        {
+            var factory = Factory;
+            if (factory != null)
+            {
+                return factory(type);
+            }
+
+            return Activator.CreateInstance(type);
         }
     }
 }
