@@ -144,6 +144,7 @@ _all TODO_
 
 Soon:
 
+- exact match method name is not consider match if another method startswith same
 - named empty string parameter causes itself (or next) to be interpreted as positional argument
 - fix  `-enumerable                System.Collections.Generic.IList<SomeEnum>`
 - omit types with no (callable) methods
