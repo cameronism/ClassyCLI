@@ -14,5 +14,6 @@ namespace ClassyCLI
         PowerShellCompletionScript,
         InstanceCreationFailed,
         UnknownParameter,
+        ArgumentValidationFailed,
     }
 }

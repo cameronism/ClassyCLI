@@ -41,7 +41,7 @@ namespace ClassyCLI
             for (int i = 0; i < ps.Length; i++)
             {
                 var param = ps[i];
-                var p = CreateParameter(param);
+                var p = CreateParameter(param, ps.Length == 1);
                 info[i] = p;
 
                 p.Name = param.Name;
@@ -55,22 +55,46 @@ namespace ClassyCLI
 
         static MethodInfo _createList = typeof(ParameterList).GetMethod(nameof(ParameterList.Create));
 
-        private static Parameter CreateParameter(ParameterInfo info)
+        private static Parameter CreateParameter(ParameterInfo info, bool composite)
         {
             if (TryGetEnumerableItem(info.ParameterType, out var item))
             {
                 return new EnumerableParameter(_createList.MakeGenericMethod(item, info.ParameterType));
             }
+            if (composite && IsComposite(info, out var ctor, out var props))
+            {
+                return new CompositeParameter(info, ctor, props);
+            }
 
             return new Parameter();
         }
 
-        public static object ConvertValue(object value, ParameterInfo parameter, bool ignoreCase)
+        public static bool IsComposite(ParameterInfo info, out ConstructorInfo ctor, out List<PropertyInfo> props)
         {
-            return ConvertValue(value, parameter.ParameterType, parameter, ignoreCase);
+            ctor = null;
+            props = null;
+
+            var type = info.ParameterType;
+            if (
+                !type.IsClass || 
+                type == typeof(string) || 
+                ((ctor = type.GetConstructor(Type.EmptyTypes)) == null) ||
+                !ctor.IsPublic
+                ) return false;
+
+            props = type.GetProperties()
+                .Where(p => p.CanRead && p.CanWrite && !p.GetMethod.IsStatic && p.GetIndexParameters().Length == 0)
+                .ToList();
+
+            return props.Count > 0;
         }
 
-        public static object ConvertValue(object value, Type destination, ParameterInfo parameter, bool ignoreCase)
+        public static object ConvertValue(object value, ParameterInfo parameter, bool ignoreCase)
+        {
+            return ConvertValue(value, parameter.ParameterType, parameter.Name, ignoreCase);
+        }
+
+        public static object ConvertValue(object value, Type destination, string parameterName, bool ignoreCase)
         {
             var comparison = ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
             if (value == null)
@@ -114,7 +138,7 @@ namespace ClassyCLI
                 }
                 catch (Exception e)
                 {
-                    throw new ConversionException(parameter, e);
+                    throw new ConversionException(parameterName, e);
                 }
             }
 
@@ -139,7 +163,7 @@ namespace ClassyCLI
                     if (TryGetFileInfo(s, out var fi)) return fi.OpenText();
 
                     // FIXME this is the part where we'll want to be more helpful 
-                    throw new ConversionException(parameter, null);
+                    throw new ConversionException(parameterName, null);
                 }
 
                 if (type == typeof(TextWriter))
@@ -169,7 +193,7 @@ namespace ClassyCLI
                     }
                     catch (Exception e)
                     {
-                        throw new ConversionException(parameter, e);
+                        throw new ConversionException(parameterName, e);
                     }
                 }
 
@@ -183,12 +207,12 @@ namespace ClassyCLI
                     }
                     catch (Exception e)
                     {
-                        throw new ConversionException(parameter, e);
+                        throw new ConversionException(parameterName, e);
                     }
                 }
 
                 // this will never work
-                throw new ConversionException(parameter, null);
+                throw new ConversionException(parameterName, null);
             }
 
             try
@@ -198,7 +222,7 @@ namespace ClassyCLI
             }
             catch (Exception e)
             {
-                throw new ConversionException(parameter, e);
+                throw new ConversionException(parameterName, e);
             }
         }
 

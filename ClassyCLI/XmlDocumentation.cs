@@ -52,6 +52,21 @@ namespace ClassyCLI
             return null;
         }
 
+        public static KeyValuePair<string, string>[] GetDocumentation(PropertyInfo prop)
+        {
+            var type = prop.DeclaringType;
+            var members = GetMembers(type.Assembly);
+            if (members == null) return null;
+
+            var key = "P:" + GetTypeName(type) + "." + prop.Name;
+            if (members.TryGetValue(key, out var docs))
+            {
+                return docs;
+            }
+
+            return null;
+        }
+
         // may want to switch to a string builder (param)
         private static string GetTypeName(Type t)
         {

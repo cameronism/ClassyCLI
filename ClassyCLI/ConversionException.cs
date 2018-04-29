@@ -3,19 +3,19 @@ using System.Reflection;
 
 namespace ClassyCLI
 {
-    [System.Serializable]
-    public class ConversionException : System.Exception
+    [Serializable]
+    public class ConversionException : Exception
     {
-        public ConversionException(ParameterInfo parameter, System.Exception inner) 
-            : base($"Failed to convert parameter: {parameter.Name}", inner)
+        public ConversionException(string parameterName, Exception inner) 
+            : base($"Failed to convert parameter: {parameterName}", inner)
         {
-            Parameter = parameter;
+            ParameterName = parameterName;
         }
 
         protected ConversionException(
             System.Runtime.Serialization.SerializationInfo info,
             System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
 
-        public ParameterInfo Parameter { get; }
+        public string ParameterName { get; }
     }
 }

@@ -19,7 +19,7 @@ namespace ClassyCLI
 
         public override void Add(string s, bool ignoreCase)
         {
-            _list.Add((TItem)Parameter.ConvertValue(s, typeof(TItem), ParameterInfo, ignoreCase));
+            _list.Add((TItem)Parameter.ConvertValue(s, typeof(TItem), ParameterInfo.Name, ignoreCase));
         }
 
         public override object Convert()

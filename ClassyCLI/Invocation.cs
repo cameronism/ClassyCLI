@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -203,7 +204,7 @@ namespace ClassyCLI
             }
             catch (ConversionException ce)
             {
-                _stderr.WriteLine("Fail to parse parameter: " + ce.Parameter.Name);
+                _stderr.WriteLine("Fail to parse parameter: " + ce.ParameterName);
                 var helpResult = InvokeHelp(head, types, _stderr);
                 helpResult.InvocationStatus = InvocationStatus.ArgumentConversionFailed;
                 helpResult.Exception = ce;
@@ -218,6 +219,23 @@ namespace ClassyCLI
                 helpResult.Exception = upe;
                 ExitCode = 1;
                 return helpResult;
+            }
+
+            if (info.Length == 1 && info[0] is CompositeParameter && args.Length == 1 && args[0] != null)
+            {
+                var vc = new ValidationContext(args[0]);
+                var vr = new List<ValidationResult>();
+                if (!Validator.TryValidateObject(args[0], vc, vr, validateAllProperties: true))
+                {
+                    foreach (var error in vr)
+                    {
+                        _stderr.WriteLine(error.ErrorMessage);
+                    }
+                    var helpResult = new InvocationResult();
+                    helpResult.Method = method;
+                    helpResult.InvocationStatus = InvocationStatus.ArgumentValidationFailed;
+                    return helpResult;
+                }
             }
 
             object instance = null;
@@ -309,7 +327,19 @@ namespace ClassyCLI
 
             if (name.Length == 0) return false;
 
-            param = parameters.SingleOrDefault(p => p.Name.Equals(name, _comparison));
+            if (parameters.Length == 1 && parameters[0] is CompositeParameter cp)
+            {
+                if (cp.TrySetName(name, _comparison))
+                {
+                    param = cp;
+                    return true;
+                }
+            }
+            else
+            {
+                param = parameters.SingleOrDefault(p => p.Name.Equals(name, _comparison));
+            }
+
             if (param == null)
             {
                 throw new UnknownParameterException(name);
@@ -341,9 +371,21 @@ namespace ClassyCLI
                     var xml = XmlDocumentation.GetDocumentation(method);
 
                     tw.WriteLine("{0,-23}{1}", suggestion.Value, GetMethodDescription(method, xml));
-                    foreach (var param in method.GetParameters())
+                    var parameters = method.GetParameters();
+                    IEnumerable<(string name, string description)> descriptions;
+
+                    if (parameters.Length == 1 && Parameter.IsComposite(parameters[0], out var _, out var props))
                     {
-                        tw.WriteLine("  -{0,-20}{1}", param.Name, DescribeParameter(param, xml));
+                        descriptions = props.Select(p => (p.Name, DescribeParameter(p)));
+                    }
+                    else
+                    {
+                        descriptions = parameters.Select(p => (p.Name, DescribeParameter(p, xml)));
+                    }
+
+                    foreach (var (name, about) in descriptions)
+                    {
+                        tw.WriteLine("  -{0,-20}{1}", name, about);
                     }
                 }
                 tw.WriteLine();
@@ -354,6 +396,22 @@ namespace ClassyCLI
             return new InvocationResult { InvocationStatus = InvocationStatus.Help };
         }
 
+        private static string DescribeParameter(PropertyInfo prop)
+        {
+            var attr = prop.GetCustomAttribute<DescriptionAttribute>();
+            if (attr != null)
+            {
+                return attr.Description;
+            }
+
+            var xml = XmlDocumentation.GetDocumentation(prop);
+            if (xml != null && TryGetValue(xml, XmlDocumentation.Summary, out var description))
+            {
+                return XmlDocumentation.GetFirstLine(description);
+            }
+
+            return FallbackDescription(prop.PropertyType);
+        }
 
         private static string DescribeParameter(ParameterInfo param, KeyValuePair<string, string>[] xml)
         {
@@ -368,7 +426,11 @@ namespace ClassyCLI
                 return description;
             }
 
-            var original = param.ParameterType;
+            return FallbackDescription(param.ParameterType);
+        }
+
+        private static string FallbackDescription(Type original)
+        {
             var underlying = Nullable.GetUnderlyingType(original);
 
             // ignore nullable for now, would be nice to print someday
